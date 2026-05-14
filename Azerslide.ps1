@@ -511,7 +511,7 @@ function New-AzerslidePresentation {
         if ([string]::IsNullOrWhiteSpace($SavePath)) {
             $safeSubject = [regex]::Replace($cleanSubject, "[^\p{L}\p{N}]+", "_").Trim("_")
             $safeGrade = [regex]::Replace($GradeText, "[^\p{L}\p{N}]+", "_").Trim("_")
-            $SavePath = Join-Path -Path (Get-Location) -ChildPath ("Azerslide_{0}_{1}.pptx" -f $safeSubject, $safeGrade)
+            $SavePath = Join-Path -Path (Get-Location) -ChildPath ("KNSlides_{0}_{1}.pptx" -f $safeSubject, $safeGrade)
         }
 
         $resolvedSavePath = [System.IO.Path]::GetFullPath($SavePath)
@@ -582,7 +582,7 @@ function Show-AzerslideDesigner {
     $warmColor = [System.Drawing.ColorTranslator]::FromHtml("#F7B267")
 
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "AzÉ™rslide PowerPoint PlanlayÄ±cÄ±sÄ±"
+    $form.Text = "KNSlides PowerPoint Planlayıcısı"
     $form.StartPosition = "CenterScreen"
     $form.Size = New-Object System.Drawing.Size(1180, 760)
     $form.MinimumSize = New-Object System.Drawing.Size(1180, 760)
@@ -596,7 +596,7 @@ function Show-AzerslideDesigner {
     $form.Controls.Add($header)
 
     $titleLabel = New-Object System.Windows.Forms.Label
-    $titleLabel.Text = "AzÉ™rslide - hÉ™qiqi PowerPoint yaradÄ±cÄ±"
+    $titleLabel.Text = "KNSlides - həqiqi PowerPoint yaradıcı"
     $titleLabel.ForeColor = [System.Drawing.Color]::White
     $titleLabel.Font = New-Object System.Drawing.Font("Segoe UI Semibold", 24)
     $titleLabel.Location = New-Object System.Drawing.Point(28, 18)
@@ -1014,7 +1014,7 @@ function Show-AzerslideDesigner {
         $dialog = New-Object System.Windows.Forms.SaveFileDialog
         $dialog.Filter = "PowerPoint Presentation (*.pptx)|*.pptx"
         $dialog.Title = "PowerPoint faylÄ±nÄ± saxla"
-        $dialog.FileName = ("Azerslide_{0}_{1}.pptx" -f ([regex]::Replace((Get-CanonicalSubject $teacherSubject), "[^\p{L}\p{N}]+", "_").Trim("_")), ([regex]::Replace($teacherGrade, "[^\p{L}\p{N}]+", "_").Trim("_")))
+        $dialog.FileName = ("KNSlides_{0}_{1}.pptx" -f ([regex]::Replace((Get-CanonicalSubject $teacherSubject), "[^\p{L}\p{N}]+", "_").Trim("_")), ([regex]::Replace($teacherGrade, "[^\p{L}\p{N}]+", "_").Trim("_")))
 
         if ($dialog.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) {
             return

@@ -69,5 +69,5 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Azerslide UI running on port ${PORT}`);
+  console.log(`KNSlides UI running on port ${PORT}`);
 });

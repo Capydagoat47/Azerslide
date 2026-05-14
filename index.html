@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Azərslide - Dərs Təqdimatı Planlayıcısı</title>
+    <title>KNSlides - Dərs Təqdimatı Planlayıcısı</title>
     <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="./theme-ui.css" />
   </head>
@@ -19,13 +19,17 @@
       <span class="theme-toggle__icon" id="theme-toggle-icon" aria-hidden="true">☾</span>
       <span class="theme-toggle__text" id="theme-toggle-text">Night mode</span>
     </button>
+
     <div class="page-shell">
       <header class="hero">
-        <div class="hero__badge">Azerbaycan məktəbləri üçün</div>
-        <h1>Azərslide təqdimat planlayıcısı</h1>
+        <div class="hero__topline">
+          <div class="hero__badge">Azərbaycan məktəbləri üçün</div>
+          <div class="hero__credit">By: Novruzov Kənan</div>
+        </div>
+        <h1>KNSlides təqdimat planlayıcısı</h1>
         <p class="hero__lead">
-          Müəllim üçün slayd quruluşu hazırlayın, düymələri seçin və PowerPoint
-          təqdimat planınızı bir neçə addımda alın.
+          Müəllim üçün dərs bölmələrini seçin, menyu düymələrini qurun və birbaşa
+          brauzerdən real PowerPoint faylı yaradın.
         </p>
       </header>
 
@@ -80,7 +84,7 @@
                 <input
                   id="class-input"
                   name="grade"
-                  placeholder="Məsələn, 5-ci sinif"
+                  placeholder="Məsələn, 3-cü sinif"
                   autocomplete="off"
                   required
                 />
@@ -117,18 +121,14 @@
                 <span class="step-card__number">3</span>
                 <div>
                   <h3>Düymə adları</h3>
-                  <p>Hansı düymələri istəyirsiniz? İstəsəniz, təkliflərdən seçin.</p>
+                  <p>İstədiyiniz menyu bölmələrini yazın və ya təkliflərdən seçin.</p>
                 </div>
               </div>
 
               <div class="suggestion-area">
                 <div class="suggestion-area__head">
                   <strong>Fənnə uyğun təkliflər</strong>
-                  <button
-                    class="link-button"
-                    type="button"
-                    id="fill-suggestions"
-                  >
+                  <button class="link-button" type="button" id="fill-suggestions">
                     Tövsiyələri avtomatik yerləşdir
                   </button>
                 </div>
@@ -139,12 +139,8 @@
             </div>
 
             <div class="actions">
-              <button class="primary-button" type="submit">
-                Struktur yarat
-              </button>
-              <button class="secondary-button" type="button" id="reset-button">
-                Təmizlə
-              </button>
+              <button class="primary-button" type="submit">PowerPoint yarat</button>
+              <button class="secondary-button" type="button" id="reset-button">Təmizlə</button>
             </div>
 
             <p class="form-note" id="form-message" aria-live="polite"></p>
@@ -158,9 +154,10 @@
           </div>
 
           <div id="empty-state" class="empty-state">
-            <p>Plan hələ yaradılmayıb.</p>
+            <p>PowerPoint hələ yaradılmayıb.</p>
             <span>
-              Fənn, sinif və düymələri seçdikdən sonra slayd strukturu burada görünəcək.
+              Fənn, sinif və düymələri seçdikdən sonra struktur burada görünəcək və
+              `.pptx` faylı yüklənəcək.
             </span>
           </div>
 
@@ -181,18 +178,23 @@
             </div>
 
             <div class="status-banner">
-              <strong>Sizin təqdimat strukturunuz hazırdır!</strong>
+              <strong>Sizin PowerPoint strukturunuz hazırdır!</strong>
             </div>
 
             <section class="result-block">
               <div class="result-block__head">
                 <h3>Giriş menyusu</h3>
-                <button class="secondary-button" type="button" id="copy-button">
-                  Mətni kopyala
-                </button>
+                <div class="result-block__actions">
+                  <button class="secondary-button" type="button" id="download-button">
+                    PowerPoint yüklə
+                  </button>
+                  <button class="secondary-button" type="button" id="copy-button">
+                    Mətni kopyala
+                  </button>
+                </div>
               </div>
               <div class="menu-preview">
-                <p>SLAYD 1 — Giriş (Menu)</p>
+                <p>SLAYD 1 - Giriş (Menu)</p>
                 <div id="menu-buttons" class="menu-buttons"></div>
               </div>
             </section>
@@ -205,17 +207,17 @@
             <section class="result-block">
               <h3>Keçid qaydaları</h3>
               <ul class="instruction-list">
-                <li>Hər giriş düyməsini aid olduğu slayda bağlayın.</li>
-                <li>Hər slaydın üzərində “⬅ Geri” düyməsi yerləşdirin.</li>
-                <li>“⬅ Geri” düyməsi əsas menyuya, yəni SLAYD 1-ə qayıtsın.</li>
+                <li>Hər giriş düyməsi öz slaydına keçid verəcək.</li>
+                <li>Hər ayrıca slaydda “⬅ Geri” düyməsi əsas menyuya qayıdacaq.</li>
+                <li>Müəllim məzmunu sonradan PowerPoint içində dolduracaq.</li>
               </ul>
             </section>
 
             <section class="result-block">
               <h3>Müəllim üçün qeyd</h3>
               <ul class="instruction-list">
-                <li>Dərs məzmunu avtomatik yaradılmır.</li>
-                <li>İzahlar, suallar, çalışmalar və videolar müəllim tərəfindən əlavə olunur.</li>
+                <li>İzahlar, suallar, çalışmalar və videolar avtomatik yazılmır.</li>
+                <li>Sistem yalnız struktur və naviqasiya skeleti yaradır.</li>
               </ul>
             </section>
 
@@ -230,6 +232,7 @@
       </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs/dist/pptxgen.bundle.js"></script>
     <script src="./script.js"></script>
     <script src="./theme-ui.js"></script>
   </body>

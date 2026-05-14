@@ -71,6 +71,12 @@ body[data-theme="night"] .hero__badge {
   border-color: rgba(255, 216, 153, 0.18);
 }
 
+body[data-theme="night"] .hero__credit {
+  color: #edf2fb;
+  background: rgba(15, 24, 33, 0.78);
+  border-color: rgba(136, 156, 177, 0.18);
+}
+
 body[data-theme="night"] .hero__lead,
 body[data-theme="night"] .step-card__head p,
 body[data-theme="night"] .summary-card__label,

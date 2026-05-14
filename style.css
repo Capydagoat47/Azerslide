@@ -56,6 +56,14 @@ body::before {
   padding: 28px 28px 18px;
 }
 
+.hero__topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .hero__badge,
 .eyebrow,
 .step-card__number,
@@ -74,6 +82,18 @@ body::before {
   background: rgba(255, 249, 238, 0.68);
   border: 1px solid rgba(155, 63, 28, 0.12);
   font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.hero__credit {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid rgba(29, 43, 40, 0.1);
+  font-size: 0.82rem;
   font-weight: 700;
 }
 
@@ -455,6 +475,12 @@ form {
   margin-bottom: 16px;
 }
 
+.result-block__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .menu-preview {
   padding: 18px;
   border-radius: var(--radius-md);
@@ -528,6 +554,14 @@ form {
   opacity: 0;
 }
 
+.secondary-button:disabled,
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+  transform: none;
+  box-shadow: none;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -579,6 +613,11 @@ form {
   .result-block__head,
   .button-field {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero__topline,
+  .result-block__actions {
     align-items: stretch;
   }
 

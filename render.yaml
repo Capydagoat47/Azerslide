@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: azerslide-ui
+    name: knslides-ui
     runtime: node
     plan: free
     buildCommand: npm install
