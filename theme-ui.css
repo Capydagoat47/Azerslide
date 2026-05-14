@@ -1,0 +1,180 @@
+.theme-toggle {
+  position: fixed;
+  right: 22px;
+  top: 50%;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(29, 43, 40, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  box-shadow: 0 14px 28px rgba(29, 43, 40, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(calc(-50% - 1px));
+  box-shadow: 0 18px 34px rgba(29, 43, 40, 0.18);
+}
+
+.theme-toggle:focus-visible {
+  outline: 0;
+  box-shadow:
+    0 0 0 4px rgba(209, 102, 57, 0.16),
+    0 18px 34px rgba(29, 43, 40, 0.18);
+}
+
+.theme-toggle__icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.theme-toggle__text {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+body[data-theme="night"] {
+  color: #edf2fb;
+  background:
+    radial-gradient(circle at top right, rgba(87, 183, 229, 0.16), transparent 26%),
+    radial-gradient(circle at left bottom, rgba(122, 199, 79, 0.14), transparent 22%),
+    linear-gradient(160deg, #091018 0%, #101925 52%, #0b1119 100%);
+}
+
+body[data-theme="night"]::before {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+body[data-theme="night"] .theme-toggle {
+  background: rgba(247, 197, 91, 0.96);
+  color: #3b2b00;
+  border-color: rgba(247, 197, 91, 0.12);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
+}
+
+body[data-theme="night"] .hero__badge {
+  color: #ffd899;
+  background: rgba(15, 24, 33, 0.7);
+  border-color: rgba(255, 216, 153, 0.18);
+}
+
+body[data-theme="night"] .hero__lead,
+body[data-theme="night"] .step-card__head p,
+body[data-theme="night"] .summary-card__label,
+body[data-theme="night"] .empty-state,
+body[data-theme="night"] .slide-card span,
+body[data-theme="night"] .button-field__index,
+body[data-theme="night"] .instruction-list,
+body[data-theme="night"] .field input::placeholder,
+body[data-theme="night"] .button-field input::placeholder {
+  color: #a8b7c8;
+}
+
+body[data-theme="night"] .empty-state p,
+body[data-theme="night"] .panel__header h2,
+body[data-theme="night"] .result-block h3,
+body[data-theme="night"] .menu-preview p,
+body[data-theme="night"] .step-card__head h3,
+body[data-theme="night"] .field span,
+body[data-theme="night"] .hero h1,
+body[data-theme="night"] .summary-card h3,
+body[data-theme="night"] .back-chip,
+body[data-theme="night"] .secondary-button {
+  color: #edf2fb;
+}
+
+body[data-theme="night"] .eyebrow,
+body[data-theme="night"] .link-button,
+body[data-theme="night"] .form-note {
+  color: #ffd28b;
+}
+
+body[data-theme="night"] .panel {
+  border-color: rgba(136, 156, 177, 0.2);
+  background: rgba(13, 22, 30, 0.84);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+}
+
+body[data-theme="night"] .step-card,
+body[data-theme="night"] .suggestion-area,
+body[data-theme="night"] .result-block,
+body[data-theme="night"] .summary-card,
+body[data-theme="night"] .menu-preview,
+body[data-theme="night"] .slide-card {
+  background: rgba(17, 27, 37, 0.86);
+  border-color: rgba(136, 156, 177, 0.18);
+}
+
+body[data-theme="night"] .field input,
+body[data-theme="night"] .button-field input,
+body[data-theme="night"] .secondary-button {
+  background: rgba(11, 18, 25, 0.92);
+  border-color: rgba(136, 156, 177, 0.2);
+  color: #edf2fb;
+}
+
+body[data-theme="night"] .choice-pill span {
+  color: #edf2fb;
+  border-color: rgba(136, 156, 177, 0.18);
+  background: linear-gradient(180deg, rgba(19, 29, 40, 0.94), rgba(12, 20, 28, 0.96));
+}
+
+body[data-theme="night"] .choice-pill input:checked + span {
+  border-color: rgba(255, 210, 139, 0.44);
+  background: linear-gradient(180deg, rgba(72, 48, 24, 0.96), rgba(42, 29, 16, 0.96));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
+}
+
+body[data-theme="night"] .chip,
+body[data-theme="night"] .back-chip {
+  color: #ffd28b;
+  background: rgba(255, 210, 139, 0.12);
+}
+
+body[data-theme="night"] .chip.is-active {
+  color: #0f1620;
+  background: #ffd28b;
+}
+
+body[data-theme="night"] .button-field__index {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body[data-theme="night"] .status-banner {
+  background: linear-gradient(135deg, #245a74 0%, #2d7f75 100%);
+  box-shadow: 0 18px 28px rgba(0, 0, 0, 0.26);
+}
+
+body[data-theme="night"] .slide-card.is-emphasized {
+  box-shadow: 0 0 0 3px rgba(255, 210, 139, 0.18), 0 18px 24px rgba(0, 0, 0, 0.26);
+}
+
+@media (max-width: 720px) {
+  .theme-toggle {
+    right: 12px;
+    top: auto;
+    bottom: 14px;
+    transform: none;
+  }
+
+  .theme-toggle:hover {
+    transform: translateY(-1px);
+  }
+
+  .theme-toggle__text {
+    display: none;
+  }
+}
