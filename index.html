@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Azərslide - Dərs Təqdimatı Planlayıcısı</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body data-theme="light">
+    <button
+      class="theme-toggle"
+      type="button"
+      id="theme-toggle"
+      aria-pressed="false"
+      aria-label="Night mode"
+      title="Night mode"
+    >
+      <span class="theme-toggle__icon" id="theme-toggle-icon" aria-hidden="true">☾</span>
+      <span class="theme-toggle__text" id="theme-toggle-text">Night mode</span>
+    </button>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero__badge">Azerbaycan məktəbləri üçün</div>
+        <h1>Azərslide təqdimat planlayıcısı</h1>
+        <p class="hero__lead">
+          Müəllim üçün slayd quruluşu hazırlayın, düymələri seçin və PowerPoint
+          təqdimat planınızı bir neçə addımda alın.
+        </p>
+      </header>
+
+      <main class="planner-grid">
+        <section class="panel panel--form">
+          <div class="panel__header">
+            <p class="eyebrow">Addım-addım quruluş</p>
+            <h2>Dərs məlumatları</h2>
+          </div>
+
+          <form id="planner-form" novalidate>
+            <div class="step-card">
+              <div class="step-card__head">
+                <span class="step-card__number">1</span>
+                <div>
+                  <h3>İlkin məlumatlar</h3>
+                  <p>Fənni və sinfi daxil edin.</p>
+                </div>
+              </div>
+
+              <label class="field">
+                <span>Fənn adı</span>
+                <input
+                  id="subject-input"
+                  name="subject"
+                  list="subject-list"
+                  placeholder="Məsələn, Riyaziyyat"
+                  autocomplete="off"
+                  required
+                />
+              </label>
+
+              <datalist id="subject-list">
+                <option value="Azərbaycan dili"></option>
+                <option value="Riyaziyyat"></option>
+                <option value="Həyat bilgisi"></option>
+                <option value="İngilis dili"></option>
+                <option value="Rus dili"></option>
+                <option value="İnformatika"></option>
+                <option value="Musiqi"></option>
+                <option value="Təsviri incəsənət"></option>
+                <option value="Fiziki tərbiyə"></option>
+                <option value="Tarix"></option>
+                <option value="Coğrafiya"></option>
+                <option value="Biologiya"></option>
+                <option value="Kimya"></option>
+                <option value="Fizika"></option>
+              </datalist>
+
+              <label class="field">
+                <span>Sinif</span>
+                <input
+                  id="class-input"
+                  name="grade"
+                  placeholder="Məsələn, 5-ci sinif"
+                  autocomplete="off"
+                  required
+                />
+              </label>
+            </div>
+
+            <div class="step-card">
+              <div class="step-card__head">
+                <span class="step-card__number">2</span>
+                <div>
+                  <h3>Giriş düymələrinin sayı</h3>
+                  <p>Neçə giriş düyməsi olsun?</p>
+                </div>
+              </div>
+
+              <div class="choice-group" id="count-group">
+                <label class="choice-pill">
+                  <input type="radio" name="buttonCount" value="3" required />
+                  <span>3 düymə</span>
+                </label>
+                <label class="choice-pill">
+                  <input type="radio" name="buttonCount" value="5" />
+                  <span>5 düymə</span>
+                </label>
+                <label class="choice-pill">
+                  <input type="radio" name="buttonCount" value="7" />
+                  <span>7 düymə</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <div class="step-card__head">
+                <span class="step-card__number">3</span>
+                <div>
+                  <h3>Düymə adları</h3>
+                  <p>Hansı düymələri istəyirsiniz? İstəsəniz, təkliflərdən seçin.</p>
+                </div>
+              </div>
+
+              <div class="suggestion-area">
+                <div class="suggestion-area__head">
+                  <strong>Fənnə uyğun təkliflər</strong>
+                  <button
+                    class="link-button"
+                    type="button"
+                    id="fill-suggestions"
+                  >
+                    Tövsiyələri avtomatik yerləşdir
+                  </button>
+                </div>
+                <div id="suggestion-list" class="chip-row" aria-live="polite"></div>
+              </div>
+
+              <div id="button-inputs" class="button-inputs" aria-live="polite"></div>
+            </div>
+
+            <div class="actions">
+              <button class="primary-button" type="submit">
+                Struktur yarat
+              </button>
+              <button class="secondary-button" type="button" id="reset-button">
+                Təmizlə
+              </button>
+            </div>
+
+            <p class="form-note" id="form-message" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="panel panel--output">
+          <div class="panel__header">
+            <p class="eyebrow">Nəticə</p>
+            <h2>Təqdimat planı</h2>
+          </div>
+
+          <div id="empty-state" class="empty-state">
+            <p>Plan hələ yaradılmayıb.</p>
+            <span>
+              Fənn, sinif və düymələri seçdikdən sonra slayd strukturu burada görünəcək.
+            </span>
+          </div>
+
+          <div id="result-area" class="result-area hidden">
+            <div class="summary-card">
+              <div>
+                <p class="summary-card__label">Fənn</p>
+                <h3 id="result-subject">-</h3>
+              </div>
+              <div>
+                <p class="summary-card__label">Sinif</p>
+                <h3 id="result-grade">-</h3>
+              </div>
+              <div>
+                <p class="summary-card__label">Düymə sayı</p>
+                <h3 id="result-count">-</h3>
+              </div>
+            </div>
+
+            <div class="status-banner">
+              <strong>Sizin təqdimat strukturunuz hazırdır!</strong>
+            </div>
+
+            <section class="result-block">
+              <div class="result-block__head">
+                <h3>Giriş menyusu</h3>
+                <button class="secondary-button" type="button" id="copy-button">
+                  Mətni kopyala
+                </button>
+              </div>
+              <div class="menu-preview">
+                <p>SLAYD 1 — Giriş (Menu)</p>
+                <div id="menu-buttons" class="menu-buttons"></div>
+              </div>
+            </section>
+
+            <section class="result-block">
+              <h3>Slayd planı</h3>
+              <div id="slide-plan" class="slide-plan"></div>
+            </section>
+
+            <section class="result-block">
+              <h3>Keçid qaydaları</h3>
+              <ul class="instruction-list">
+                <li>Hər giriş düyməsini aid olduğu slayda bağlayın.</li>
+                <li>Hər slaydın üzərində “⬅ Geri” düyməsi yerləşdirin.</li>
+                <li>“⬅ Geri” düyməsi əsas menyuya, yəni SLAYD 1-ə qayıtsın.</li>
+              </ul>
+            </section>
+
+            <section class="result-block">
+              <h3>Müəllim üçün qeyd</h3>
+              <ul class="instruction-list">
+                <li>Dərs məzmunu avtomatik yaradılmır.</li>
+                <li>İzahlar, suallar, çalışmalar və videolar müəllim tərəfindən əlavə olunur.</li>
+              </ul>
+            </section>
+
+            <textarea
+              id="copy-buffer"
+              class="copy-buffer"
+              aria-hidden="true"
+              tabindex="-1"
+            ></textarea>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
