@@ -35,6 +35,23 @@ Use it to:
 The `Light / Night` button changes only the program UI.
 It does not change generated slides or slide content.
 
+### Render hosting
+
+If Render requires a start command, deploy the planner UI as a `Web Service`.
+
+Use:
+
+- Build Command: `npm install`
+- Start Command: `npm start`
+
+This works because the repo now includes:
+
+- `package.json`
+- `server.js`
+- `render.yaml`
+
+If your Render service points directly at this app folder, those commands are enough.
+
 ### PowerPoint generator
 
 On Windows with Microsoft PowerPoint installed:

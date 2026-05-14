@@ -1,0 +1,9 @@
+{
+  "name": "azerslide-ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Azerslide planner UI for Render hosting",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
