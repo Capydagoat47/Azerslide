@@ -1,30 +1,46 @@
-# KNSlides
+﻿# KNSlides Pro
 
-KNSlides is an Azerbaijani lesson presentation planner that can generate a real `.pptx` PowerPoint file directly from the hosted UI.
+KNSlides Pro is an Azerbaijani lesson presentation builder for schools that automatically designs a lesson flow and downloads a real `.pptx` file.
 
 Created by: `Novruzov Kənan`
 
-## What it does
+## What changed
 
-- Lets the teacher choose a subject and grade
-- Suggests lesson menu buttons by subject
-- Builds a slide structure preview in Azerbaijani
-- Downloads a real PowerPoint presentation from the browser
-- Uses a more playful slide style for grades `1-4`
-- Uses a cleaner, lightly playful style for higher grades
-- Includes a UI-only `Light / Night` mode
+The old manual button workflow has been removed.
+
+Teachers now use this flow:
+
+1. Choose subject
+2. Choose grade
+3. Optionally add lesson topic
+4. Optionally paste a TRIMS link, upload a PDF, or paste textbook text
+5. Preview the generated lesson presentation
+6. Download the PowerPoint file
+
+## Core features
+
+- Automatic lesson structure generation by subject and topic
+- Grade-based theme switching
+- `1–4-cü sinif` for brighter, more playful presentation design
+- `5–11-ci sinif` for calmer academic presentation design
+- `Smart Board Mode` for larger text and touch-friendly layout
+- Real `.pptx` generation in the browser with `PptxGenJS`
+- TRIMS/textbook resource extraction with server-side URL parsing
+- PDF upload parsing in the browser
+- UI-only `Light / Night` mode
 
 ## Project files
 
-- `index.html` - KNSlides interface
-- `style.css` - base UI styling
-- `theme-ui.css` - UI-only theme styling
-- `script.js` - planner logic and browser-side PowerPoint export
-- `theme-ui.js` - light/night mode logic
-- `server.js` - static web server for Render
-- `package.json` - Node start script for Render
-- `render.yaml` - Render service configuration
-- `Azerslide.ps1` - legacy local Windows PowerPoint automation script
+- `index.html` - KNSlides Pro interface and workflow layout
+- `style.css` - main visual design for the app UI
+- `theme-ui.css` - UI-only light/night mode styling
+- `theme-ui.js` - program light/night mode toggle logic
+- `lesson-engine.js` - shared lesson planning engine used by browser and server logic
+- `script.js` - client-side app flow, preview rendering, source handling, and PPTX export
+- `server.js` - static server plus remote textbook/TRIMS fetch endpoint
+- `package.json` - Node runtime and dependency list for hosting
+- `render.yaml` - Render deployment configuration
+- `Azerslide.ps1` - legacy local Windows generator kept for older local workflows
 
 ## Render hosting
 
@@ -32,7 +48,7 @@ Deploy as a `Web Service`.
 
 Use:
 
-- Root Directory: `Azerslide`
+- Root Directory: project root
 - Build Command: `npm install`
 - Start Command: `npm start`
 
@@ -53,6 +69,6 @@ http://localhost:3000
 
 ## Notes
 
-- The hosted version now creates the PowerPoint in the browser.
-- The `Azerslide.ps1` file is still available for Windows-only local use, but it is no longer required for the hosted flow.
-- The theme toggle changes only the program UI, not the generated slide design mode.
+- Program branding stays in the app UI.
+- Generated slides do not show `KNSlides Pro` or `By: Novruzov Kənan` in the slide content.
+- If source extraction fails, the planner falls back to `subject + grade + topic`.

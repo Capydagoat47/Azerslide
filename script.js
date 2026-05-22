@@ -1,795 +1,885 @@
-const APP_NAME = "KNSlides";
-const AUTHOR_NAME = "Novruzov Kənan";
+﻿const APP_NAME = "KNSlides Pro";
+const engine = window.KNSLessonEngine;
 
-const curriculumSubjects = [
-  "Azərbaycan dili",
-  "Riyaziyyat",
-  "Həyat bilgisi",
-  "İngilis dili",
-  "Rus dili",
-  "İnformatika",
-  "Musiqi",
-  "Təsviri incəsənət",
-  "Fiziki tərbiyə",
-  "Tarix",
-  "Coğrafiya",
-  "Biologiya",
-  "Kimya",
-  "Fizika",
-];
-
-const suggestionMap = {
-  "Azərbaycan dili": [
-    "Dərslik",
-    "Motivasiya",
-    "Söz Boğçası",
-    "Dinləyib anlama",
-    "Oxuyub anlama",
-    "Refleksiya",
-    "Oyun",
-  ],
-  Riyaziyyat: [
-    "Dərslik",
-    "Motivasiya",
-    "Məsələ həlli",
-    "İş dəftəri",
-    "Refleksiya",
-    "Oyun",
-  ],
-  "İngilis dili": [
-    "Vocabulary",
-    "Reading",
-    "Listening",
-    "Speaking",
-    "Practice",
-    "Game",
-  ],
-  "Rus dili": [
-    "Vocabulary",
-    "Reading",
-    "Listening",
-    "Speaking",
-    "Practice",
-    "Game",
-  ],
-};
-
-const defaultSuggestions = [
-  "Dərslik",
-  "Motivasiya",
-  "Tapşırıq",
-  "Refleksiya",
-  "Oyun",
-];
+if (!engine) {
+  throw new Error("KNSLessonEngine yüklənmədi.");
+}
 
 const form = document.querySelector("#planner-form");
 const subjectInput = document.querySelector("#subject-input");
-const classInput = document.querySelector("#class-input");
-const countInputs = document.querySelectorAll('input[name="buttonCount"]');
-const suggestionList = document.querySelector("#suggestion-list");
-const buttonInputsContainer = document.querySelector("#button-inputs");
-const fillSuggestionsButton = document.querySelector("#fill-suggestions");
-const formMessage = document.querySelector("#form-message");
+const gradeInput = document.querySelector("#grade-input");
+const topicInput = document.querySelector("#topic-input");
+const resourceUrlInput = document.querySelector("#resource-url-input");
+const pdfInput = document.querySelector("#pdf-input");
+const sourceTextInput = document.querySelector("#source-text-input");
+const smartboardToggle = document.querySelector("#smartboard-toggle");
+const previewButton = document.querySelector("#preview-button");
+const downloadButton = document.querySelector("#download-button");
 const resetButton = document.querySelector("#reset-button");
+const formMessage = document.querySelector("#form-message");
+const resourceHint = document.querySelector("#resource-hint");
+const themeIndicator = document.querySelector("#theme-indicator");
+const smartboardIndicator = document.querySelector("#smartboard-indicator");
 const emptyState = document.querySelector("#empty-state");
 const resultArea = document.querySelector("#result-area");
 const resultSubject = document.querySelector("#result-subject");
 const resultGrade = document.querySelector("#result-grade");
-const resultCount = document.querySelector("#result-count");
-const menuButtons = document.querySelector("#menu-buttons");
+const resultTopic = document.querySelector("#result-topic");
+const lessonTitle = document.querySelector("#lesson-title");
+const sourceSummary = document.querySelector("#source-summary");
+const sourceLabel = document.querySelector("#source-label");
 const slidePlan = document.querySelector("#slide-plan");
-const copyButton = document.querySelector("#copy-button");
-const downloadButton = document.querySelector("#download-button");
-const copyBuffer = document.querySelector("#copy-buffer");
+const keywordList = document.querySelector("#keyword-list");
+const conceptList = document.querySelector("#concept-list");
+const activityList = document.querySelector("#activity-list");
+const questionList = document.querySelector("#question-list");
+const previewThemeBadge = document.querySelector("#preview-theme-badge");
+const previewSmartboardBadge = document.querySelector("#preview-smartboard-badge");
 
 const plannerState = {
-  subject: "",
-  grade: "",
-  buttons: [],
+  plan: null,
 };
 
-let manualNames = [];
+let pdfJsPromise = null;
 
-function normalizeText(text) {
-  return String(text || "").trim().replace(/\s+/g, " ");
+function normalizeText(value) {
+  return engine.normalizeText(value);
 }
 
-function foldText(text) {
-  return normalizeText(text).toLocaleLowerCase("az");
+function normalizeSourceInput(value) {
+  return engine.normalizeSourceText
+    ? engine.normalizeSourceText(value)
+    : String(value || "").replace(/\r\n/g, "\n").trim();
 }
 
-function slugify(text) {
-  return foldText(text)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+function slugify(value) {
+  return engine.slugify(value);
 }
 
-function makeSlideId(label) {
-  return `slide-${slugify(label) || "bolme"}`;
+function setMessage(message = "", tone = "info") {
+  formMessage.textContent = message;
+
+  if (!message || tone === "info") {
+    delete formMessage.dataset.tone;
+    return;
+  }
+
+  formMessage.dataset.tone = tone;
 }
 
-function getButtonCount() {
-  const selected = document.querySelector('input[name="buttonCount"]:checked');
-  return selected ? Number(selected.value) : 0;
+function getSelectedTheme() {
+  return engine.getThemeMode(gradeInput.value || "5-ci sinif");
 }
 
-function getSuggestions(subject) {
-  const matchedEntry = Object.entries(suggestionMap).find(
-    ([key]) => foldText(key) === foldText(subject),
+function updateThemeIndicator() {
+  const theme = getSelectedTheme();
+  themeIndicator.textContent = theme.label;
+  previewThemeBadge.textContent = theme.label;
+}
+
+function updateSmartboardIndicator() {
+  const isEnabled = smartboardToggle.checked;
+  const label = isEnabled ? "🖥 Smart Board Mode: On" : "🖥 Smart Board Mode: Off";
+  const previewLabel = isEnabled ? "🖥 Smart Board: On" : "🖥 Smart Board: Off";
+
+  smartboardIndicator.textContent = label;
+  previewSmartboardBadge.textContent = previewLabel;
+}
+
+function updateResourceHint() {
+  const hasPdf = Boolean(pdfInput.files && pdfInput.files[0]);
+  const hasUrl = Boolean(normalizeText(resourceUrlInput.value));
+  const hasText = Boolean(normalizeText(sourceTextInput.value));
+
+  if (hasPdf) {
+    resourceHint.textContent = "PDF seçilib. Plan qurularkən əvvəlcə yüklənmiş PDF analiz olunacaq.";
+    return;
+  }
+
+  if (hasUrl) {
+    resourceHint.textContent = "TRIMS və ya mənbə linki daxil edilib. Məzmun əvvəlcə server üzərindən çıxarılacaq.";
+    return;
+  }
+
+  if (hasText) {
+    resourceHint.textContent = "Daxil edilən dərslik mətni analiz ediləcək və struktur həmin mətnə uyğun qurulacaq.";
+    return;
+  }
+
+  resourceHint.textContent =
+    "Mənbə əlavə edilməsə, KNSlides Pro yalnız fənn + sinif + mövzuya əsasən plan quracaq.";
+}
+
+function createInfoListItem(text) {
+  const item = document.createElement("li");
+  item.textContent = text;
+  return item;
+}
+
+function renderList(target, values, fallbackText) {
+  target.innerHTML = "";
+  const listValues = values.length ? values : [fallbackText];
+  listValues.forEach((value) => target.appendChild(createInfoListItem(value)));
+}
+
+function renderKeywords(values) {
+  keywordList.innerHTML = "";
+  const items = values.length ? values : ["Açar sözlər plan qurulduqdan sonra görünəcək."];
+
+  items.forEach((value) => {
+    const chip = document.createElement("span");
+    chip.className = "keyword-chip";
+    chip.textContent = value;
+    keywordList.appendChild(chip);
+  });
+}
+
+function createChipRow(values, accent = false) {
+  const row = document.createElement("div");
+  row.className = "slide-card__chips";
+
+  values.forEach((value) => {
+    const chip = document.createElement("span");
+    chip.className = accent ? "slide-chip slide-chip--outline" : "slide-chip";
+    chip.textContent = value;
+    row.appendChild(chip);
+  });
+
+  return row;
+}
+
+function createSlideCard(title, subtitle, chips, secondaryChips) {
+  const card = document.createElement("article");
+  card.className = "slide-card";
+
+  const meta = document.createElement("div");
+  meta.className = "slide-card__meta";
+
+  const titleNode = document.createElement("strong");
+  titleNode.textContent = title;
+  meta.appendChild(titleNode);
+
+  if (subtitle) {
+    const subtitleNode = document.createElement("span");
+    subtitleNode.textContent = subtitle;
+    meta.appendChild(subtitleNode);
+  }
+
+  card.appendChild(meta);
+
+  if (chips && chips.length) {
+    card.appendChild(createChipRow(chips));
+  }
+
+  if (secondaryChips && secondaryChips.length) {
+    card.appendChild(createChipRow(secondaryChips, true));
+  }
+
+  return card;
+}
+
+function renderSlidePlan(plan) {
+  slidePlan.innerHTML = "";
+
+  slidePlan.appendChild(
+    createSlideCard(
+      "SLAYD 1 — Başlıq slaydı",
+      "Dərsin adı, fənn, sinif və təqdimat tonu",
+      [plan.subject, plan.grade, plan.theme.shortLabel],
+      plan.topic ? [plan.topic] : [],
+    ),
   );
-  return matchedEntry ? matchedEntry[1] : defaultSuggestions;
-}
 
-function getCanonicalSubject(subject) {
-  const matchedSubject = curriculumSubjects.find(
-    (item) => foldText(item) === foldText(subject),
+  slidePlan.appendChild(
+    createSlideCard(
+      "SLAYD 2 — Dərsin marşrutu",
+      "Avtomatik qurulan bölmələr və keçid düymələri",
+      plan.sections.map((section) => section.title),
+      plan.smartboardMode ? ["Smart Board üçün iri keçidlər"] : [],
+    ),
   );
-  return matchedSubject || normalizeText(subject);
+
+  plan.sections.forEach((section, index) => {
+    const card = createSlideCard(
+      `SLAYD ${index + 3} — ${section.title}`,
+      section.prompt,
+      section.focus,
+      section.teacherFill,
+    );
+    slidePlan.appendChild(card);
+  });
 }
 
-function getGradeNumber(grade) {
-  const match = normalizeText(grade).match(/\d+/);
-  return match ? Number(match[0]) : null;
+function renderPreview(plan) {
+  plannerState.plan = plan;
+  emptyState.classList.add("hidden");
+  resultArea.classList.remove("hidden");
+
+  resultSubject.textContent = plan.subject;
+  resultGrade.textContent = plan.grade;
+  resultTopic.textContent = plan.topic || "Avtomatik mövzu axını";
+  lessonTitle.textContent = plan.lessonTitle;
+  sourceSummary.textContent = plan.sourceSummary;
+  sourceLabel.textContent = `Mənbə: ${plan.sourceLabel}`;
+  previewThemeBadge.textContent = plan.theme.label;
+  previewSmartboardBadge.textContent = plan.smartboardMode
+    ? "🖥 Smart Board: On"
+    : "🖥 Smart Board: Off";
+
+  renderSlidePlan(plan);
+  renderKeywords(plan.keywords);
+  renderList(conceptList, plan.concepts, "Əsas anlayışlar mövzuya əsasən qurulacaq.");
+  renderList(activityList, plan.activities, "Fəaliyyət hissəsi fənnə uyğun avtomatik hazırlanacaq.");
+  renderList(questionList, plan.questions, "Sual istiqamətləri mövzuya uyğun müəllim tərəfindən doldurulacaq.");
+
+  downloadButton.disabled = false;
 }
 
-function isKidsGrade(grade) {
-  const gradeNumber = getGradeNumber(grade);
-  return gradeNumber !== null && gradeNumber >= 1 && gradeNumber <= 4;
+async function loadPdfJs() {
+  if (!pdfJsPromise) {
+    pdfJsPromise = import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs").then(
+      (pdfjs) => {
+        pdfjs.GlobalWorkerOptions.workerSrc =
+          "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
+        return pdfjs;
+      },
+    );
+  }
+
+  return pdfJsPromise;
 }
 
-function getPresentationTheme(grade) {
-  if (isKidsGrade(grade)) {
+async function extractTextFromPdf(file) {
+  const pdfjs = await loadPdfJs();
+  const buffer = await file.arrayBuffer();
+  const documentRef = await pdfjs.getDocument({ data: buffer }).promise;
+  const pageTexts = [];
+
+  for (let pageNumber = 1; pageNumber <= documentRef.numPages; pageNumber += 1) {
+    const page = await documentRef.getPage(pageNumber);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map((item) => item.str).join(" ");
+    pageTexts.push(normalizeText(pageText));
+  }
+
+  return {
+    sourceText: pageTexts.join("\n"),
+    sourceLabel: `${file.name} (${documentRef.numPages} səhifə)` ,
+    sourceType: "pdf",
+  };
+}
+
+async function fetchRemoteSource(url) {
+  const response = await fetch("/api/fetch-resource", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ url }),
+  });
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => ({ error: "Mənbə oxunmadı." }));
+    throw new Error(errorPayload.error || "Mənbə oxunmadı.");
+  }
+
+  const payload = await response.json();
+  return {
+    sourceText: payload.text || "",
+    sourceLabel: payload.sourceLabel || url,
+    sourceType: payload.sourceType || "url",
+  };
+}
+
+async function collectSourceData() {
+  const manualText = normalizeSourceInput(sourceTextInput.value);
+  const remoteUrl = normalizeText(resourceUrlInput.value);
+  const selectedFile = pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
+
+  if (selectedFile) {
+    try {
+      return await extractTextFromPdf(selectedFile);
+    } catch (error) {
+      console.error(error);
+      setMessage("PDF analiz olunmadı. Fallback olaraq digər məlumatlardan istifadə ediləcək.", "error");
+    }
+  }
+
+  if (remoteUrl) {
+    try {
+      return await fetchRemoteSource(remoteUrl);
+    } catch (error) {
+      console.error(error);
+      setMessage("TRIMS və ya mənbə linki oxunmadı. Fallback olaraq digər məlumatlardan istifadə ediləcək.", "error");
+    }
+  }
+
+  if (manualText) {
     return {
-      modeLabel: "1-4-cü sinif üçün rəngli və oyunvari",
-      background: "FFF6D8",
-      surface: "FFFFFF",
-      accent: "FF8A3D",
-      accentTwo: "57B7E5",
-      accentThree: "7AC74F",
-      accentFour: "FFD166",
-      text: "20435C",
-      muted: "4A6776",
-      buttonText: "FFFFFF",
-      note: "FFFDF6",
-      noteBorder: "F1D38B",
-      titleFont: "Arial Rounded MT Bold",
-      bodyFont: "Aptos",
+      sourceText: manualText,
+      sourceLabel: "Müəllimin daxil etdiyi dərslik mətni",
+      sourceType: "text",
     };
   }
 
   return {
-    modeLabel: "5-ci sinif və yuxarı üçün səliqəli və yüngül dinamik",
-    background: "F4F6FA",
-    surface: "FFFFFF",
-    accent: "2D5B87",
-    accentTwo: "4E9B8E",
-    accentThree: "D98E3D",
-    accentFour: "DEE6F0",
-    text: "17324D",
-    muted: "536476",
-    buttonText: "FFFFFF",
-    note: "FFFFFF",
-    noteBorder: "D9E2EF",
-    titleFont: "Aptos Display",
-    bodyFont: "Aptos",
+    sourceText: "",
+    sourceLabel: "Fənn və mövzu əsaslı avtomatik quruluş",
+    sourceType: "none",
   };
 }
 
-function updateFormMessage(message = "") {
-  formMessage.textContent = message;
-}
+async function generatePlan() {
+  const subject = engine.getCanonicalSubject(subjectInput.value);
+  const grade = gradeInput.value;
+  const topic = normalizeText(topicInput.value);
 
-function renderSuggestionChips() {
-  const suggestions = getSuggestions(subjectInput.value);
-  suggestionList.innerHTML = "";
-
-  suggestions.forEach((suggestion) => {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "chip";
-    chip.textContent = suggestion;
-    chip.addEventListener("click", () => applySuggestion(suggestion));
-    suggestionList.appendChild(chip);
-  });
-
-  syncActiveChips();
-}
-
-function buildButtonFields(count) {
-  buttonInputsContainer.innerHTML = "";
-
-  if (!count) {
-    return;
+  if (!normalizeText(subject) || !normalizeText(grade)) {
+    setMessage("Zəhmət olmasa ən azı fənn və sinif sahələrini doldurun.", "error");
+    return null;
   }
 
-  const suggestions = getSuggestions(subjectInput.value);
-  manualNames = Array.from({ length: count }, (_, index) => {
-    return normalizeText(manualNames[index]) || suggestions[index] || "";
-  });
-
-  manualNames.forEach((value, index) => {
-    const wrapper = document.createElement("label");
-    wrapper.className = "button-field";
-
-    const indexBadge = document.createElement("span");
-    indexBadge.className = "button-field__index";
-    indexBadge.textContent = String(index + 1).padStart(2, "0");
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.name = `button-name-${index}`;
-    input.placeholder = `Düymə ${index + 1}`;
-    input.value = value;
-    input.maxLength = 40;
-    input.required = true;
-    input.addEventListener("input", (event) => {
-      manualNames[index] = event.target.value;
-      syncActiveChips();
-    });
-
-    wrapper.append(indexBadge, input);
-    buttonInputsContainer.appendChild(wrapper);
-  });
-
-  syncActiveChips();
-}
-
-function applySuggestion(suggestion) {
-  const textInputs = buttonInputsContainer.querySelectorAll("input");
-
-  if (!textInputs.length) {
-    updateFormMessage("Əvvəlcə düymə sayını seçin.");
-    return;
-  }
-
-  const duplicateIndex = manualNames.findIndex(
-    (name) => foldText(name) === foldText(suggestion),
-  );
-
-  if (duplicateIndex >= 0) {
-    textInputs[duplicateIndex].focus();
-    updateFormMessage(`"${suggestion}" artıq siyahıda var.`);
-    return;
-  }
-
-  const emptyIndex = manualNames.findIndex((name) => !normalizeText(name));
-  if (emptyIndex < 0) {
-    updateFormMessage("Bütün düymə sahələri doludur. Mövcud adlardan birini dəyişin.");
-    return;
-  }
-
-  manualNames[emptyIndex] = suggestion;
-  textInputs[emptyIndex].value = suggestion;
-  textInputs[emptyIndex].focus();
-  syncActiveChips();
-  updateFormMessage(`"${suggestion}" əlavə edildi.`);
-}
-
-function fillFromSuggestions() {
-  const count = getButtonCount();
-
-  if (!count) {
-    updateFormMessage("Əvvəlcə 3, 5 və ya 7 düymədən birini seçin.");
-    return;
-  }
-
-  const suggestions = getSuggestions(subjectInput.value);
-  manualNames = Array.from({ length: count }, (_, index) => suggestions[index] || "");
-  buildButtonFields(count);
-  updateFormMessage("Tövsiyələr sahələrə yerləşdirildi. İstəsəniz, adları dəyişə bilərsiniz.");
-}
-
-function syncActiveChips() {
-  const selectedNames = manualNames.map((name) => foldText(name)).filter(Boolean);
-
-  suggestionList.querySelectorAll(".chip").forEach((chip) => {
-    chip.classList.toggle("is-active", selectedNames.includes(foldText(chip.textContent)));
-  });
-}
-
-function collectButtonNames() {
-  return Array.from(buttonInputsContainer.querySelectorAll("input"))
-    .map((input) => normalizeText(input.value))
-    .filter(Boolean);
-}
-
-function buildCopyText(subject, grade, buttons) {
-  const lines = [];
-  lines.push("Sizin PowerPoint strukturunuz hazırdır!");
-  lines.push("");
-  lines.push(`Layihə: ${APP_NAME}`);
-  lines.push(`By: ${AUTHOR_NAME}`);
-  lines.push(`Fənn: ${subject}`);
-  lines.push(`Sinif: ${grade}`);
-  lines.push("");
-  lines.push("SLAYD 1 - Giriş (Menu)");
-  buttons.forEach((button) => lines.push(`- ${button}`));
-  lines.push("");
-  buttons.forEach((button, index) => {
-    lines.push(`SLAYD ${index + 2} - ${button}`);
-  });
-  lines.push("");
-  lines.push("Naviqasiya:");
-  lines.push("- Hər giriş düyməsi uyğun slayda keçid verir.");
-  lines.push('- Hər ayrıca slaydda "⬅ Geri" düyməsi əsas menyuya qayıdır.');
-  lines.push("");
-  lines.push("Müəllim dolduracaq:");
-  lines.push("- izahlar");
-  lines.push("- suallar");
-  lines.push("- çalışmalar");
-  lines.push("- videolar");
-  return lines.join("\n");
-}
-
-function renderResult(subject, grade, buttons) {
-  emptyState.classList.add("hidden");
-  resultArea.classList.remove("hidden");
-
-  plannerState.subject = subject;
-  plannerState.grade = grade;
-  plannerState.buttons = [...buttons];
-
-  resultSubject.textContent = subject;
-  resultGrade.textContent = grade;
-  resultCount.textContent = `${buttons.length} düymə`;
-
-  menuButtons.innerHTML = "";
-  slidePlan.innerHTML = "";
-
-  buttons.forEach((button) => {
-    const targetSlideId = makeSlideId(button);
-    const menuChip = document.createElement("button");
-    menuChip.type = "button";
-    menuChip.className = "menu-chip";
-    menuChip.textContent = button;
-    menuChip.addEventListener("click", () => {
-      const targetSlide = document.getElementById(targetSlideId);
-      if (!targetSlide) {
-        return;
-      }
-
-      targetSlide.scrollIntoView({ behavior: "smooth", block: "center" });
-      targetSlide.classList.remove("is-emphasized");
-      window.requestAnimationFrame(() => {
-        targetSlide.classList.add("is-emphasized");
-      });
-    });
-    menuButtons.appendChild(menuChip);
-  });
-
-  const menuSlide = document.createElement("article");
-  menuSlide.className = "slide-card";
-  menuSlide.innerHTML = `
-    <p><strong>SLAYD 1 - Giriş (Menu)</strong></p>
-    <span>Bütün giriş düymələri bu slaydda görünəcək.</span>
-  `;
-  slidePlan.appendChild(menuSlide);
-
-  buttons.forEach((button, index) => {
-    const targetSlideId = makeSlideId(button);
-    const slideCard = document.createElement("article");
-    slideCard.className = "slide-card";
-    slideCard.id = targetSlideId;
-    slideCard.style.animationDelay = `${index * 70}ms`;
-    slideCard.innerHTML = `
-      <p><strong>SLAYD ${index + 2} - ${button}</strong></p>
-      <span>Bu hissənin məzmununu müəllim PowerPoint daxilində dolduracaq.</span>
-      <button type="button" class="back-chip">⬅ Geri</button>
-    `;
-    slideCard.querySelector(".back-chip").addEventListener("click", () => {
-      document.querySelector(".menu-preview")?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    });
-    slidePlan.appendChild(slideCard);
-  });
-
-  copyBuffer.value = buildCopyText(subject, grade, buttons);
-  downloadButton.disabled = false;
-}
-
-function resetPlanner() {
-  form.reset();
-  manualNames = [];
-  plannerState.subject = "";
-  plannerState.grade = "";
-  plannerState.buttons = [];
-  buttonInputsContainer.innerHTML = "";
-  emptyState.classList.remove("hidden");
-  resultArea.classList.add("hidden");
+  setMessage("Plan hazırlanır...");
+  previewButton.disabled = true;
   downloadButton.disabled = true;
-  updateFormMessage("");
-  renderSuggestionChips();
+
+  try {
+    const sourceData = await collectSourceData();
+    const plan = engine.buildLessonPlan({
+      subject,
+      grade,
+      topic,
+      smartboardMode: smartboardToggle.checked,
+      sourceText: sourceData.sourceText,
+      sourceType: sourceData.sourceType,
+      sourceLabel: sourceData.sourceLabel,
+    });
+
+    renderPreview(plan);
+    setMessage("Sizin təqdimat strukturunuz hazırdır!", "success");
+    resultArea.scrollIntoView({ behavior: "smooth", block: "start" });
+    return plan;
+  } catch (error) {
+    console.error(error);
+    setMessage("Plan qurularkən xəta baş verdi.", "error");
+    return null;
+  } finally {
+    previewButton.disabled = false;
+    if (plannerState.plan) {
+      downloadButton.disabled = false;
+    }
+  }
 }
 
-function createPptxFileName(subject, grade) {
-  const safeSubject = slugify(subject) || "ders";
-  const safeGrade = slugify(grade) || "sinif";
-  return `KNSlides_${safeSubject}_${safeGrade}.pptx`;
+function shapeType(pptx, preferred, fallback) {
+  return pptx.ShapeType[preferred] || pptx.ShapeType[fallback];
 }
 
-function addAuthorMark(slide, theme) {
-  slide.addText(`By: ${AUTHOR_NAME}`, {
-    x: 9.2,
-    y: 0.25,
-    w: 2.6,
-    h: 0.3,
+function getPresentationTheme(plan) {
+  const primaryMode = plan.theme.mode === "primary";
+  const smartScale = plan.smartboardMode ? 1.18 : 1;
+
+  if (primaryMode) {
+    return {
+      primaryMode,
+      smartScale,
+      bg: "FFF7E8",
+      surface: "FFFFFF",
+      surfaceSoft: "FFF1DB",
+      accent: "FF8F3F",
+      accent2: "3DA4FF",
+      accent3: "68C36B",
+      accent4: "FFD86B",
+      text: "21415B",
+      muted: "5C7488",
+      titleFont: "Arial Rounded MT Bold",
+      bodyFont: "Trebuchet MS",
+      coverTitle: 28 * smartScale,
+      sectionTitle: 24 * smartScale,
+      bodySize: 16 * smartScale,
+      smallSize: 12 * smartScale,
+      navSize: 14 * smartScale,
+    };
+  }
+
+  return {
+    primaryMode,
+    smartScale,
+    bg: "F4F7FB",
+    surface: "FFFFFF",
+    surfaceSoft: "EEF3FB",
+    accent: "2F6DF6",
+    accent2: "19A485",
+    accent3: "FF9D2F",
+    accent4: "D9E5FF",
+    text: "162338",
+    muted: "5F6F86",
+    titleFont: "Aptos Display",
+    bodyFont: "Aptos",
+    coverTitle: 25 * smartScale,
+    sectionTitle: 22 * smartScale,
+    bodySize: 14 * smartScale,
+    smallSize: 11 * smartScale,
+    navSize: 13 * smartScale,
+  };
+}
+
+function addBackgroundDecor(slide, pptx, theme) {
+  slide.background = { color: theme.bg };
+
+  if (theme.primaryMode) {
+    slide.addShape(shapeType(pptx, "ellipse", "rect"), {
+      x: -0.2,
+      y: 5.1,
+      w: 2.1,
+      h: 1.8,
+      fill: { color: theme.accent4, transparency: 8 },
+      line: { color: theme.accent4, transparency: 100 },
+    });
+    slide.addShape(shapeType(pptx, "ellipse", "rect"), {
+      x: 10.4,
+      y: -0.15,
+      w: 2,
+      h: 1.7,
+      fill: { color: theme.accent2, transparency: 18 },
+      line: { color: theme.accent2, transparency: 100 },
+    });
+    slide.addShape(shapeType(pptx, "ellipse", "rect"), {
+      x: 8.8,
+      y: 5.2,
+      w: 1.6,
+      h: 1.4,
+      fill: { color: theme.accent3, transparency: 18 },
+      line: { color: theme.accent3, transparency: 100 },
+    });
+    return;
+  }
+
+  slide.addShape(shapeType(pptx, "rect", "rect"), {
+    x: 0,
+    y: 0,
+    w: 13.33,
+    h: 0.58,
+    fill: { color: theme.accent },
+    line: { color: theme.accent, transparency: 100 },
+  });
+  slide.addShape(shapeType(pptx, "rect", "rect"), {
+    x: 11.2,
+    y: 0,
+    w: 2.13,
+    h: 7.5,
+    fill: { color: theme.accent4, transparency: 20 },
+    line: { color: theme.accent4, transparency: 100 },
+  });
+}
+
+function addPill(slide, pptx, text, x, y, width, theme, fillColor) {
+  slide.addText(text, {
+    x,
+    y,
+    w: width,
+    h: 0.42,
+    align: "center",
+    valign: "mid",
+    color: theme.text,
     fontFace: theme.bodyFont,
-    fontSize: 9,
+    fontSize: theme.smallSize,
+    bold: true,
+    shape: shapeType(pptx, "roundRect", "rect"),
+    fill: { color: fillColor || theme.surfaceSoft },
+    line: { color: fillColor || theme.surfaceSoft, transparency: 100 },
+    margin: 0.05,
+  });
+}
+
+function addSlideTitle(slide, pptx, title, subtitle, theme) {
+  slide.addText(title, {
+    x: 0.65,
+    y: 0.52,
+    w: 7.8,
+    h: 0.6,
+    color: theme.text,
+    fontFace: theme.titleFont,
+    fontSize: theme.sectionTitle,
+    bold: true,
+    margin: 0,
+  });
+
+  slide.addText(subtitle, {
+    x: 0.68,
+    y: 1.16,
+    w: 7.4,
+    h: 0.48,
     color: theme.muted,
-    align: "right",
+    fontFace: theme.bodyFont,
+    fontSize: theme.bodySize - 1,
     margin: 0,
   });
 }
 
-function addBackgroundDecor(slide, pptx, theme, kidsMode) {
-  slide.background = { color: theme.background };
+function addCoverSlide(pptx, plan, theme) {
+  const slide = pptx.addSlide();
+  addBackgroundDecor(slide, pptx, theme);
 
-  if (kidsMode) {
-    slide.addShape(pptx.ShapeType.ellipse, {
-      x: -0.1,
-      y: 5.0,
-      w: 2.2,
-      h: 1.8,
-      fill: { color: theme.accentFour, transparency: 12 },
-      line: { color: theme.accentFour, transparency: 100 },
-    });
-    slide.addShape(pptx.ShapeType.ellipse, {
-      x: 10.0,
-      y: -0.15,
-      w: 2.1,
-      h: 1.9,
-      fill: { color: theme.accentTwo, transparency: 14 },
-      line: { color: theme.accentTwo, transparency: 100 },
-    });
-    slide.addShape(pptx.ShapeType.ellipse, {
-      x: 8.2,
-      y: 5.2,
-      w: 1.7,
-      h: 1.5,
-      fill: { color: theme.accentThree, transparency: 12 },
-      line: { color: theme.accentThree, transparency: 100 },
-    });
-  } else {
-    slide.addShape(pptx.ShapeType.rect, {
-      x: 0,
-      y: 0,
-      w: 13.33,
-      h: 0.55,
-      fill: { color: theme.accent },
-      line: { color: theme.accent, transparency: 100 },
-    });
-    slide.addShape(pptx.ShapeType.rect, {
-      x: 10.9,
-      y: 0,
-      w: 2.43,
-      h: 7.5,
-      fill: { color: theme.accentFour, transparency: 5 },
-      line: { color: theme.accentFour, transparency: 100 },
-    });
-    slide.addShape(pptx.ShapeType.ellipse, {
-      x: 10.2,
-      y: 5.1,
-      w: 1.8,
-      h: 1.5,
-      fill: { color: theme.accentTwo, transparency: 18 },
-      line: { color: theme.accentTwo, transparency: 100 },
-    });
-  }
-}
-
-function addHeader(slide, pptx, theme, subject, grade, title, subtitle) {
-  slide.addText(title, {
-    x: 0.6,
-    y: 0.45,
-    w: 7.8,
-    h: 0.55,
+  slide.addText(plan.lessonTitle, {
+    x: 0.8,
+    y: 1.18,
+    w: 7.7,
+    h: 1.25,
     fontFace: theme.titleFont,
-    fontSize: 24,
+    fontSize: theme.coverTitle,
+    bold: true,
+    color: theme.text,
+    margin: 0,
+    fit: "shrink",
+  });
+
+  slide.addText(
+    plan.topic
+      ? `${plan.subject} • ${plan.grade} • ${plan.topic}`
+      : `${plan.subject} • ${plan.grade}`,
+    {
+      x: 0.82,
+      y: 2.5,
+      w: 5.3,
+      h: 0.46,
+      fontFace: theme.bodyFont,
+      fontSize: theme.bodySize,
+      color: theme.text,
+      margin: 0,
+    },
+  );
+
+  addPill(slide, pptx, plan.theme.shortLabel, 0.82, 3.12, 2.3, theme, theme.surfaceSoft);
+  addPill(
+    slide,
+    pptx,
+    plan.smartboardMode ? "Smart Board Mode" : "Standart Görünüş",
+    3.28,
+    3.12,
+    2.35,
+    theme,
+    theme.surfaceSoft,
+  );
+
+  slide.addText(plan.sourceSummary, {
+    x: 0.84,
+    y: 4.02,
+    w: 5.6,
+    h: 1.05,
+    fontFace: theme.bodyFont,
+    fontSize: theme.bodySize,
+    color: theme.muted,
+    margin: 0,
+    valign: "mid",
+  });
+
+  slide.addShape(shapeType(pptx, "roundRect", "rect"), {
+    x: 7.8,
+    y: 1.25,
+    w: 3.8,
+    h: 3.75,
+    fill: { color: theme.surface },
+    line: { color: theme.accent4 || theme.surfaceSoft, width: 1 },
+    radius: 0.18,
+  });
+
+  slide.addText("Bu təqdimatda yaradılacaq bölmələr", {
+    x: 8.1,
+    y: 1.58,
+    w: 3.1,
+    h: 0.4,
+    fontFace: theme.titleFont,
+    fontSize: theme.bodySize + 1,
     bold: true,
     color: theme.text,
     margin: 0,
   });
 
-  slide.addText(`Fənn: ${subject}     Sinif: ${grade}`, {
-    x: 0.62,
-    y: 1.07,
-    w: 4.7,
-    h: 0.4,
-    fontFace: theme.bodyFont,
-    fontSize: 12,
-    color: theme.text,
-    align: "center",
-    valign: "mid",
-    shape: pptx.ShapeType.rect,
-    fill: { color: theme.surface, transparency: 8 },
-    line: { color: theme.accentFour, transparency: 30, width: 1 },
-    margin: 0.07,
+  slide.addText(
+    plan.sections.map((section, index) => `${index + 1}. ${section.title}`).join("\n"),
+    {
+      x: 8.1,
+      y: 2.1,
+      w: 2.95,
+      h: 2.5,
+      fontFace: theme.bodyFont,
+      fontSize: theme.bodySize,
+      color: theme.text,
+      breakLine: false,
+      margin: 0,
+      bullet: { indent: 12 },
+    },
+  );
+}
+
+function addRouteSlide(pptx, plan, theme) {
+  const slide = pptx.addSlide();
+  addBackgroundDecor(slide, pptx, theme);
+  addSlideTitle(slide, pptx, "Dərsin marşrutu", "Bölmələr avtomatik yaradılıb və interaktiv keçidlər əlavə olunub.", theme);
+
+  const rows = plan.sections.length > 4 ? 3 : 2;
+  const columns = Math.ceil(plan.sections.length / rows);
+  const buttonWidth = theme.primaryMode || plan.smartboardMode ? 2.6 : 2.35;
+  const buttonHeight = plan.smartboardMode ? 0.92 : 0.76;
+  const gapX = 0.24;
+  const gapY = 0.26;
+  const startX = 0.8;
+  const startY = 2.0;
+  const palette = [theme.accent, theme.accent2, theme.accent3, "7A78FF", "F26B8A", "17A34A"];
+
+  plan.sections.forEach((section, index) => {
+    const row = Math.floor(index / columns);
+    const column = index % columns;
+
+    slide.addText(section.title, {
+      x: startX + column * (buttonWidth + gapX),
+      y: startY + row * (buttonHeight + gapY),
+      w: buttonWidth,
+      h: buttonHeight,
+      fontFace: theme.titleFont,
+      fontSize: theme.bodySize,
+      bold: true,
+      color: "FFFFFF",
+      align: "center",
+      valign: "mid",
+      shape: shapeType(pptx, "roundRect", "rect"),
+      fill: { color: palette[index % palette.length] },
+      line: { color: palette[index % palette.length], transparency: 100 },
+      hyperlink: { slide: index + 3 },
+      margin: 0.08,
+      fit: "shrink",
+    });
   });
 
-  slide.addText(subtitle, {
-    x: 0.62,
-    y: 1.55,
-    w: 7.4,
-    h: 0.45,
+  slide.addText(
+    "Müəllim hər bölmədə izah, sual, məşq, video və ya smartboard aktivliyini özü doldurur.",
+    {
+      x: 0.82,
+      y: 5.55,
+      w: 8.1,
+      h: 0.42,
+      fontFace: theme.bodyFont,
+      fontSize: theme.smallSize,
+      color: theme.muted,
+      margin: 0,
+    },
+  );
+}
+
+function addSectionSlide(pptx, plan, section, index, theme) {
+  const slide = pptx.addSlide();
+  addBackgroundDecor(slide, pptx, theme);
+  addSlideTitle(slide, pptx, section.title, section.prompt, theme);
+
+  const focusItems = (section.focus.length ? section.focus : plan.keywords).slice(
+    0,
+    plan.smartboardMode ? 3 : 4,
+  );
+  const teacherItems = section.teacherFill.slice(0, plan.smartboardMode ? 3 : 4);
+
+  slide.addShape(shapeType(pptx, "roundRect", "rect"), {
+    x: 0.74,
+    y: 1.95,
+    w: 5.05,
+    h: 2.7,
+    fill: { color: theme.surface },
+    line: { color: theme.accent4 || theme.surfaceSoft, width: 1 },
+    radius: 0.18,
+  });
+
+  slide.addText("Bu bölmədə vurğulansın", {
+    x: 1.02,
+    y: 2.18,
+    w: 2.8,
+    h: 0.3,
+    fontFace: theme.titleFont,
+    fontSize: theme.bodySize + 1,
+    bold: true,
+    color: theme.text,
+    margin: 0,
+  });
+
+  slide.addText(focusItems.map((item) => `• ${item}`).join("\n"), {
+    x: 1.02,
+    y: 2.6,
+    w: 4.2,
+    h: 1.55,
     fontFace: theme.bodyFont,
-    fontSize: 15,
+    fontSize: theme.bodySize,
+    color: theme.text,
+    margin: 0,
+    breakLine: false,
+  });
+
+  slide.addShape(shapeType(pptx, "roundRect", "rect"), {
+    x: 6.08,
+    y: 1.95,
+    w: 4.25,
+    h: 2.7,
+    fill: { color: theme.surfaceSoft },
+    line: { color: theme.surfaceSoft, transparency: 100 },
+    radius: 0.18,
+  });
+
+  slide.addText("Müəllim əlavə edəcək", {
+    x: 6.36,
+    y: 2.18,
+    w: 2.7,
+    h: 0.3,
+    fontFace: theme.titleFont,
+    fontSize: theme.bodySize + 1,
+    bold: true,
+    color: theme.text,
+    margin: 0,
+  });
+
+  slide.addText(teacherItems.map((item) => `• ${item}`).join("\n"), {
+    x: 6.36,
+    y: 2.6,
+    w: 3.35,
+    h: 1.5,
+    fontFace: theme.bodyFont,
+    fontSize: theme.bodySize,
+    color: theme.text,
+    margin: 0,
+    breakLine: false,
+  });
+
+  slide.addText(plan.smartboardMode ? "İri mətn və geniş boşluq aktivdir." : "Standart təqdimat axını istifadə olunur.", {
+    x: 0.82,
+    y: 4.92,
+    w: 4.2,
+    h: 0.34,
+    fontFace: theme.bodyFont,
+    fontSize: theme.smallSize,
     color: theme.muted,
     margin: 0,
   });
 
-  addAuthorMark(slide, theme);
-}
+  slide.addText("Marşruta qayıt", {
+    x: 0.82,
+    y: 5.42,
+    w: plan.smartboardMode ? 2.4 : 2.08,
+    h: plan.smartboardMode ? 0.64 : 0.56,
+    fontFace: theme.titleFont,
+    fontSize: theme.navSize,
+    bold: true,
+    color: "FFFFFF",
+    align: "center",
+    valign: "mid",
+    shape: shapeType(pptx, "roundRect", "rect"),
+    fill: { color: theme.accent },
+    line: { color: theme.accent, transparency: 100 },
+    hyperlink: { slide: 2 },
+    margin: 0.08,
+  });
 
-function addTeacherPlaceholder(slide, pptx, theme, kidsMode) {
-  slide.addText(
-    [
-      { text: "Bu slayd müəllim tərəfindən doldurulacaq.\n", options: { bold: true } },
-      { text: "\nƏlavə ediləcək hissələr:\n" },
-      { text: "• izahlar\n• suallar\n• çalışmalar\n• videolar" },
-    ],
-    {
-      x: 0.72,
-      y: 2.15,
-      w: 6.1,
-      h: 2.75,
-      fontFace: theme.bodyFont,
-      fontSize: kidsMode ? 20 : 18,
-      color: theme.text,
-      breakLine: false,
-      margin: 0.16,
-      shape: pptx.ShapeType.rect,
-      fill: { color: theme.note, transparency: 0 },
-      line: { color: theme.noteBorder, width: 1.2 },
-      valign: "mid",
-    },
-  );
-
-  slide.addText(
-    "Bu bölmədə interaktiv tapşırıq, şəkil, audio və ya qısa video yerləşdirə bilərsiniz.",
-    {
-      x: 7.25,
-      y: 2.15,
-      w: 2.95,
-      h: 2.75,
-      fontFace: theme.bodyFont,
-      fontSize: 15,
-      color: theme.muted,
-      margin: 0.16,
-      shape: pptx.ShapeType.rect,
-      fill: { color: theme.surface, transparency: 0 },
-      line: { color: theme.accentFour, width: 1 },
-      valign: "mid",
-    },
-  );
-}
-
-function addMenuButtonsToSlide(slide, pptx, theme, buttons) {
-  const palette = [
-    theme.accent,
-    theme.accentTwo,
-    theme.accentThree,
-    "C76363",
-    "7A6FF0",
-    "00A7A0",
-    "F29E4C",
-  ];
-
-  const rows =
-    buttons.length === 3
-      ? [[0, 1, 2]]
-      : buttons.length === 5
-        ? [[0, 1, 2], [3, 4]]
-        : [[0, 1, 2], [3, 4, 5], [6]];
-
-  const buttonWidth = 2.2;
-  const buttonHeight = 0.76;
-  const gap = 0.2;
-  const startY = buttons.length === 7 ? 2.35 : 2.55;
-
-  rows.forEach((row, rowIndex) => {
-    const totalWidth = row.length * buttonWidth + (row.length - 1) * gap;
-    const startX = (13.33 - totalWidth) / 2;
-
-    row.forEach((buttonIndex, itemIndex) => {
-      const buttonTitle = buttons[buttonIndex];
-      slide.addText(buttonTitle, {
-        x: startX + itemIndex * (buttonWidth + gap),
-        y: startY + rowIndex * 1.0,
-        w: buttonWidth,
-        h: buttonHeight,
-        fontFace: theme.titleFont,
-        fontSize: 18,
-        bold: true,
-        color: theme.buttonText,
-        align: "center",
-        valign: "mid",
-        shape: pptx.ShapeType.rect,
-        fill: { color: palette[buttonIndex % palette.length] },
-        line: { color: palette[buttonIndex % palette.length], transparency: 100 },
-        hyperlink: { slide: buttonIndex + 2, tooltip: `${buttonTitle} slaydına keç` },
-        margin: 0.06,
-      });
-    });
+  const hasNextSlide = index < plan.sections.length - 1;
+  slide.addText(hasNextSlide ? "Növbəti bölmə" : "Yekun", {
+    x: 9.2,
+    y: 5.42,
+    w: plan.smartboardMode ? 2.4 : 2.08,
+    h: plan.smartboardMode ? 0.64 : 0.56,
+    fontFace: theme.titleFont,
+    fontSize: theme.navSize,
+    bold: true,
+    color: "FFFFFF",
+    align: "center",
+    valign: "mid",
+    shape: shapeType(pptx, "roundRect", "rect"),
+    fill: { color: theme.accent2 },
+    line: { color: theme.accent2, transparency: 100 },
+    hyperlink: { slide: hasNextSlide ? index + 4 : 2 },
+    margin: 0.08,
   });
 }
 
-function buildPresentation(subject, grade, buttons) {
+function buildPresentation(plan) {
   if (typeof window.PptxGenJS !== "function") {
-    throw new Error("PowerPoint kitabxanası yüklənmədi. Səhifəni yeniləyib yenidən cəhd edin.");
+    throw new Error("PowerPoint kitabxanası yüklənmədi.");
   }
 
-  const theme = getPresentationTheme(grade);
-  const kidsMode = isKidsGrade(grade);
   const pptx = new window.PptxGenJS();
+  const theme = getPresentationTheme(plan);
 
   pptx.layout = "LAYOUT_WIDE";
-  pptx.author = AUTHOR_NAME;
-  pptx.company = APP_NAME;
-  pptx.subject = subject;
-  pptx.title = `${APP_NAME} - ${subject}`;
   pptx.lang = "az-Latn-AZ";
+  pptx.subject = plan.subject;
+  pptx.title = plan.lessonTitle;
+  pptx.author = "";
+  pptx.company = "";
 
-  const menuSlide = pptx.addSlide();
-  addBackgroundDecor(menuSlide, pptx, theme, kidsMode);
-  addHeader(
-    menuSlide,
-    pptx,
-    theme,
-    subject,
-    grade,
-    `${APP_NAME} dərs menyusu`,
-    `${theme.modeLabel} dizayn ilə interaktiv təqdimat`,
-  );
-
-  menuSlide.addText("Düyməyə klik edin və uyğun bölməyə keçin.", {
-    x: 0.64,
-    y: 1.98,
-    w: 5.1,
-    h: 0.44,
-    fontFace: theme.bodyFont,
-    fontSize: 14,
-    color: theme.muted,
-    shape: pptx.ShapeType.rect,
-    fill: { color: theme.surface, transparency: 10 },
-    line: { color: theme.accentFour, transparency: 30, width: 1 },
-    margin: 0.07,
-  });
-
-  addMenuButtonsToSlide(menuSlide, pptx, theme, buttons);
-  menuSlide.addNotes(
-    "Bu təqdimat skeleti avtomatik yaradılıb. Müəllim izahlar, suallar, çalışmalar və videoları sonradan əlavə edəcək.",
-  );
-
-  buttons.forEach((button, index) => {
-    const slide = pptx.addSlide();
-    addBackgroundDecor(slide, pptx, theme, kidsMode);
-    addHeader(
-      slide,
-      pptx,
-      theme,
-      subject,
-      grade,
-      `SLAYD ${index + 2} - ${button}`,
-      "Məzmunu müəllim sonradan PowerPoint daxilində doldurur.",
-    );
-    addTeacherPlaceholder(slide, pptx, theme, kidsMode);
-
-    slide.addText("⬅ Geri", {
-      x: 0.74,
-      y: 5.55,
-      w: 1.75,
-      h: 0.5,
-      fontFace: theme.titleFont,
-      fontSize: 16,
-      bold: true,
-      color: theme.buttonText,
-      align: "center",
-      valign: "mid",
-      shape: pptx.ShapeType.rect,
-      fill: { color: theme.accent },
-      line: { color: theme.accent, transparency: 100 },
-      hyperlink: { slide: 1, tooltip: "Əsas menyuya qayıt" },
-      margin: 0.06,
-    });
-
-    slide.addNotes(
-      [
-        `Bölmə: ${button}`,
-        "Müəllim burada izahlar, suallar, çalışmalar və videolar yerləşdirə bilər.",
-      ].join("\n"),
-    );
-  });
+  addCoverSlide(pptx, plan, theme);
+  addRouteSlide(pptx, plan, theme);
+  plan.sections.forEach((section, index) => addSectionSlide(pptx, plan, section, index, theme));
 
   return pptx;
 }
 
-async function downloadPresentation() {
-  const subject = plannerState.subject;
-  const grade = plannerState.grade;
-  const buttons = plannerState.buttons;
+function createPptxFileName(plan) {
+  const topicPart = slugify(plan.topic || plan.lessonTitle || plan.grade) || "ders";
+  const subjectPart = slugify(plan.subject) || "fenn";
+  return `${subjectPart}_${topicPart}.pptx`;
+}
 
-  if (!subject || !grade || !buttons.length) {
-    updateFormMessage("Əvvəlcə təqdimat quruluşunu hazırlayın.");
+async function downloadPresentation() {
+  const plan = plannerState.plan || (await generatePlan());
+
+  if (!plan) {
     return;
   }
 
-  updateFormMessage("PowerPoint hazırlanır...");
   downloadButton.disabled = true;
+  setMessage("PowerPoint hazırlanır...");
 
   try {
-    const pptx = buildPresentation(subject, grade, buttons);
-    const fileName = createPptxFileName(subject, grade);
-    await pptx.writeFile({ fileName });
-    updateFormMessage("PowerPoint uğurla yükləndi.");
+    const pptx = buildPresentation(plan);
+    await pptx.writeFile({ fileName: createPptxFileName(plan) });
+    setMessage("PowerPoint uğurla yükləndi.", "success");
   } catch (error) {
-    updateFormMessage("PowerPoint yaradılarkən xəta baş verdi.");
     console.error(error);
+    setMessage("PowerPoint yaradılarkən xəta baş verdi.", "error");
   } finally {
     downloadButton.disabled = false;
   }
 }
 
-subjectInput.addEventListener("input", () => {
-  renderSuggestionChips();
-  if (getButtonCount()) {
-    buildButtonFields(getButtonCount());
-  }
-});
-
-countInputs.forEach((input) => {
-  input.addEventListener("change", () => {
-    updateFormMessage("");
-    buildButtonFields(getButtonCount());
-  });
-});
-
-fillSuggestionsButton.addEventListener("click", fillFromSuggestions);
-resetButton.addEventListener("click", resetPlanner);
-downloadButton.addEventListener("click", downloadPresentation);
-
-copyButton.addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(copyBuffer.value);
-    updateFormMessage("Plan mətni panoya kopyalandı.");
-  } catch (error) {
-    copyBuffer.select();
-    document.execCommand("copy");
-    updateFormMessage("Plan mətni panoya kopyalandı.");
-  }
-});
+function resetApp() {
+  form.reset();
+  plannerState.plan = null;
+  downloadButton.disabled = true;
+  emptyState.classList.remove("hidden");
+  resultArea.classList.add("hidden");
+  slidePlan.innerHTML = "";
+  renderKeywords([]);
+  renderList(conceptList, [], "Əsas anlayışlar mövzuya əsasən qurulacaq.");
+  renderList(activityList, [], "Fəaliyyət hissəsi fənnə uyğun avtomatik hazırlanacaq.");
+  renderList(questionList, [], "Sual istiqamətləri mövzuya uyğun müəllim tərəfindən doldurulacaq.");
+  updateThemeIndicator();
+  updateSmartboardIndicator();
+  updateResourceHint();
+  setMessage("");
+}
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  updateFormMessage("");
-
-  const subject = getCanonicalSubject(subjectInput.value);
-  const grade = normalizeText(classInput.value);
-  const count = getButtonCount();
-  const buttons = collectButtonNames();
-
-  if (!subject || !grade || !count) {
-    updateFormMessage("Zəhmət olmasa bütün əsas sahələri doldurun.");
-    return;
-  }
-
-  if (buttons.length !== count || buttons.some((button) => !button)) {
-    updateFormMessage("Seçilmiş say qədər düymə adı yazılmalıdır.");
-    return;
-  }
-
-  if (new Set(buttons.map((button) => foldText(button))).size !== buttons.length) {
-    updateFormMessage("Düymə adları bir-birindən fərqli olmalıdır.");
-    return;
-  }
-
-  renderResult(subject, grade, buttons);
-  resultArea.scrollIntoView({ behavior: "smooth", block: "start" });
-  await downloadPresentation();
+  await generatePlan();
 });
 
-downloadButton.disabled = true;
-renderSuggestionChips();
+downloadButton.addEventListener("click", downloadPresentation);
+resetButton.addEventListener("click", resetApp);
+gradeInput.addEventListener("change", updateThemeIndicator);
+smartboardToggle.addEventListener("change", updateSmartboardIndicator);
+resourceUrlInput.addEventListener("input", updateResourceHint);
+sourceTextInput.addEventListener("input", updateResourceHint);
+pdfInput.addEventListener("change", updateResourceHint);
+
+updateThemeIndicator();
+updateSmartboardIndicator();
+updateResourceHint();
+renderKeywords([]);
+renderList(conceptList, [], "Əsas anlayışlar mövzuya əsasən qurulacaq.");
+renderList(activityList, [], "Fəaliyyət hissəsi fənnə uyğun avtomatik hazırlanacaq.");
+renderList(questionList, [], "Sual istiqamətləri mövzuya uyğun müəllim tərəfindən doldurulacaq.");
+

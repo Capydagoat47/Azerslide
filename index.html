@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="az">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KNSlides - Dərs Təqdimatı Planlayıcısı</title>
+    <title>KNSlides Pro</title>
     <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="./theme-ui.css" />
   </head>
@@ -23,21 +23,29 @@
     <div class="page-shell">
       <header class="hero">
         <div class="hero__topline">
-          <div class="hero__badge">Azərbaycan məktəbləri üçün</div>
+          <div class="hero__brand-stack">
+            <span class="hero__eyebrow">Azərbaycan məktəbləri üçün ağıllı dərs axını</span>
+            <h1>KNSlides Pro</h1>
+          </div>
           <div class="hero__credit">By: Novruzov Kənan</div>
         </div>
-        <h1>KNSlides təqdimat planlayıcısı</h1>
+
         <p class="hero__lead">
-          Müəllim üçün dərs bölmələrini seçin, menyu düymələrini qurun və birbaşa
-          brauzerdən real PowerPoint faylı yaradın.
+          Müəllim yalnız fənni, sinfi və mövzunu seçir. KNSlides Pro isə dərsin
+          strukturunu, dizayn istiqamətini və PowerPoint skeletini avtomatik qurur.
         </p>
+
+        <div class="hero__status-row">
+          <div class="status-pill" id="theme-indicator">🎨 Theme: Academic Mode</div>
+          <div class="status-pill" id="smartboard-indicator">🖥 Smart Board Mode: Off</div>
+        </div>
       </header>
 
       <main class="planner-grid">
         <section class="panel panel--form">
           <div class="panel__header">
-            <p class="eyebrow">Addım-addım quruluş</p>
-            <h2>Dərs məlumatları</h2>
+            <p class="eyebrow">Yeni workflow</p>
+            <h2>Avtomatik dərs qurucusu</h2>
           </div>
 
           <form id="planner-form" novalidate>
@@ -45,13 +53,13 @@
               <div class="step-card__head">
                 <span class="step-card__number">1</span>
                 <div>
-                  <h3>İlkin məlumatlar</h3>
-                  <p>Fənni və sinfi daxil edin.</p>
+                  <h3>Fənni seçin</h3>
+                  <p>Dərsin strukturunu qurmaq üçün əsas istiqaməti seçin.</p>
                 </div>
               </div>
 
               <label class="field">
-                <span>Fənn adı</span>
+                <span>Fənn</span>
                 <input
                   id="subject-input"
                   name="subject"
@@ -78,69 +86,127 @@
                 <option value="Kimya"></option>
                 <option value="Fizika"></option>
               </datalist>
-
-              <label class="field">
-                <span>Sinif</span>
-                <input
-                  id="class-input"
-                  name="grade"
-                  placeholder="Məsələn, 3-cü sinif"
-                  autocomplete="off"
-                  required
-                />
-              </label>
             </div>
 
             <div class="step-card">
               <div class="step-card__head">
                 <span class="step-card__number">2</span>
                 <div>
-                  <h3>Giriş düymələrinin sayı</h3>
-                  <p>Neçə giriş düyməsi olsun?</p>
+                  <h3>Sinfi seçin</h3>
+                  <p>Sinifə görə dizayn və təqdimat tonu avtomatik dəyişəcək.</p>
                 </div>
               </div>
 
-              <div class="choice-group" id="count-group">
-                <label class="choice-pill">
-                  <input type="radio" name="buttonCount" value="3" required />
-                  <span>3 düymə</span>
-                </label>
-                <label class="choice-pill">
-                  <input type="radio" name="buttonCount" value="5" />
-                  <span>5 düymə</span>
-                </label>
-                <label class="choice-pill">
-                  <input type="radio" name="buttonCount" value="7" />
-                  <span>7 düymə</span>
-                </label>
-              </div>
+              <label class="field">
+                <span>Sinif</span>
+                <select id="grade-input" name="grade" required>
+                  <option value="">Sinfi seçin</option>
+                  <option value="1-ci sinif">1-ci sinif</option>
+                  <option value="2-ci sinif">2-ci sinif</option>
+                  <option value="3-cü sinif">3-cü sinif</option>
+                  <option value="4-cü sinif">4-cü sinif</option>
+                  <option value="5-ci sinif">5-ci sinif</option>
+                  <option value="6-cı sinif">6-cı sinif</option>
+                  <option value="7-ci sinif">7-ci sinif</option>
+                  <option value="8-ci sinif">8-ci sinif</option>
+                  <option value="9-cu sinif">9-cu sinif</option>
+                  <option value="10-cu sinif">10-cu sinif</option>
+                  <option value="11-ci sinif">11-ci sinif</option>
+                </select>
+              </label>
             </div>
 
             <div class="step-card">
               <div class="step-card__head">
                 <span class="step-card__number">3</span>
                 <div>
-                  <h3>Düymə adları</h3>
-                  <p>İstədiyiniz menyu bölmələrini yazın və ya təkliflərdən seçin.</p>
+                  <h3>Mövzu əlavə edin</h3>
+                  <p>İstəyə bağlıdır, amma planı daha dəqiq qurmağa kömək edir.</p>
                 </div>
               </div>
 
-              <div class="suggestion-area">
-                <div class="suggestion-area__head">
-                  <strong>Fənnə uyğun təkliflər</strong>
-                  <button class="link-button" type="button" id="fill-suggestions">
-                    Tövsiyələri avtomatik yerləşdir
-                  </button>
+              <label class="field">
+                <span>Mövzu</span>
+                <input
+                  id="topic-input"
+                  name="topic"
+                  placeholder="Məsələn, Kəsrlər"
+                  autocomplete="off"
+                />
+              </label>
+            </div>
+
+            <div class="step-card">
+              <div class="step-card__head">
+                <span class="step-card__number">4</span>
+                <div>
+                  <h3>TRIMS və ya dərslik mənbəsi</h3>
+                  <p>
+                    İstəyə bağlı olaraq TRIMS linki, PDF səhifəsi və ya dərslik mətni əlavə edin.
+                  </p>
                 </div>
-                <div id="suggestion-list" class="chip-row" aria-live="polite"></div>
               </div>
 
-              <div id="button-inputs" class="button-inputs" aria-live="polite"></div>
+              <label class="field">
+                <span>TRIMS linki</span>
+                <input
+                  id="resource-url-input"
+                  name="resourceUrl"
+                  type="url"
+                  placeholder="https://www.trims.edu.az/..."
+                  autocomplete="off"
+                />
+              </label>
+
+              <label class="field">
+                <span>PDF və ya kitab səhifəsi</span>
+                <input id="pdf-input" name="pdfFile" type="file" accept=".pdf,application/pdf" />
+              </label>
+
+              <label class="field">
+                <span>Dərslik mətni</span>
+                <textarea
+                  id="source-text-input"
+                  name="sourceText"
+                  rows="7"
+                  placeholder="Dərslikdən mətn, tapşırıq və ya izah hissəsini bura əlavə edin."
+                ></textarea>
+              </label>
+
+              <p class="field-hint" id="resource-hint">
+                Mənbə əlavə edilməsə, KNSlides Pro yalnız fənn + sinif + mövzuya əsasən plan quracaq.
+              </p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-card__head">
+                <span class="step-card__number">5</span>
+                <div>
+                  <h3>Smartboard Mode</h3>
+                  <p>İri mətn, geniş klik sahələri və uzaqdan daha rahat görünüş.</p>
+                </div>
+              </div>
+
+              <label class="toggle-card" for="smartboard-toggle">
+                <div>
+                  <strong>🖥 Smart Board Mode</strong>
+                  <span>Təqdimatı interaktiv lövhə üçün optimallaşdır.</span>
+                </div>
+                <span class="toggle-switch">
+                  <input id="smartboard-toggle" name="smartboardMode" type="checkbox" />
+                  <span class="toggle-switch__track"></span>
+                </span>
+              </label>
             </div>
 
             <div class="actions">
-              <button class="primary-button" type="submit">PowerPoint yarat</button>
-              <button class="secondary-button" type="button" id="reset-button">Təmizlə</button>
+              <button class="primary-button" type="submit" id="preview-button">
+                Təqdimatı qur
+              </button>
+              <button class="secondary-button" type="button" id="download-button" disabled>
+                PowerPoint yüklə
+              </button>
+              <button class="ghost-button" type="button" id="reset-button">Sıfırla</button>
             </div>
 
             <p class="form-note" id="form-message" aria-live="polite"></p>
@@ -149,15 +215,15 @@
 
         <section class="panel panel--output">
           <div class="panel__header">
-            <p class="eyebrow">Nəticə</p>
-            <h2>Təqdimat planı</h2>
+            <p class="eyebrow">Preview</p>
+            <h2>Avtomatik yaradılmış təqdimat</h2>
           </div>
 
           <div id="empty-state" class="empty-state">
-            <p>PowerPoint hələ yaradılmayıb.</p>
+            <p>Plan hələ qurulmayıb.</p>
             <span>
-              Fənn, sinif və düymələri seçdikdən sonra struktur burada görünəcək və
-              `.pptx` faylı yüklənəcək.
+              Fənn, sinif və mövzu daxil edin. İstəsəniz TRIMS və ya dərslik mənbəsi də əlavə
+              edin, sonra KNSlides Pro strukturunu avtomatik hazırlayacaq.
             </span>
           </div>
 
@@ -172,67 +238,66 @@
                 <h3 id="result-grade">-</h3>
               </div>
               <div>
-                <p class="summary-card__label">Düymə sayı</p>
-                <h3 id="result-count">-</h3>
+                <p class="summary-card__label">Mövzu</p>
+                <h3 id="result-topic">-</h3>
               </div>
             </div>
 
-            <div class="status-banner">
-              <strong>Sizin PowerPoint strukturunuz hazırdır!</strong>
+            <div class="status-banner" id="result-banner">
+              Sizin təqdimat strukturunuz hazırdır!
             </div>
 
             <section class="result-block">
               <div class="result-block__head">
-                <h3>Giriş menyusu</h3>
-                <div class="result-block__actions">
-                  <button class="secondary-button" type="button" id="download-button">
-                    PowerPoint yüklə
-                  </button>
-                  <button class="secondary-button" type="button" id="copy-button">
-                    Mətni kopyala
-                  </button>
+                <div>
+                  <p class="result-block__eyebrow">Dərsin başlığı</p>
+                  <h3 id="lesson-title">-</h3>
+                </div>
+                <div class="result-badges">
+                  <span class="preview-badge" id="preview-theme-badge">🎨 Theme: Academic Mode</span>
+                  <span class="preview-badge" id="preview-smartboard-badge">🖥 Smart Board: Off</span>
                 </div>
               </div>
-              <div class="menu-preview">
-                <p>SLAYD 1 - Giriş (Menu)</p>
-                <div id="menu-buttons" class="menu-buttons"></div>
-              </div>
+
+              <p class="result-copy" id="source-summary">-</p>
+              <p class="result-copy result-copy--muted" id="source-label">-</p>
             </section>
 
             <section class="result-block">
-              <h3>Slayd planı</h3>
+              <div class="result-block__head">
+                <div>
+                  <p class="result-block__eyebrow">Auto-generated flow</p>
+                  <h3>Slayd planı</h3>
+                </div>
+              </div>
               <div id="slide-plan" class="slide-plan"></div>
             </section>
 
-            <section class="result-block">
-              <h3>Keçid qaydaları</h3>
-              <ul class="instruction-list">
-                <li>Hər giriş düyməsi öz slaydına keçid verəcək.</li>
-                <li>Hər ayrıca slaydda “⬅ Geri” düyməsi əsas menyuya qayıdacaq.</li>
-                <li>Müəllim məzmunu sonradan PowerPoint içində dolduracaq.</li>
-              </ul>
+            <section class="result-block insights-grid">
+              <article class="insight-card">
+                <h3>Açar sözlər</h3>
+                <div id="keyword-list" class="keyword-list"></div>
+              </article>
+              <article class="insight-card">
+                <h3>Əsas anlayışlar</h3>
+                <ul id="concept-list" class="insight-list"></ul>
+              </article>
+              <article class="insight-card">
+                <h3>Fəaliyyət ipucları</h3>
+                <ul id="activity-list" class="insight-list"></ul>
+              </article>
+              <article class="insight-card">
+                <h3>Sual istiqamətləri</h3>
+                <ul id="question-list" class="insight-list"></ul>
+              </article>
             </section>
-
-            <section class="result-block">
-              <h3>Müəllim üçün qeyd</h3>
-              <ul class="instruction-list">
-                <li>İzahlar, suallar, çalışmalar və videolar avtomatik yazılmır.</li>
-                <li>Sistem yalnız struktur və naviqasiya skeleti yaradır.</li>
-              </ul>
-            </section>
-
-            <textarea
-              id="copy-buffer"
-              class="copy-buffer"
-              aria-hidden="true"
-              tabindex="-1"
-            ></textarea>
           </div>
         </section>
       </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs/dist/pptxgen.bundle.js"></script>
+    <script src="./lesson-engine.js"></script>
     <script src="./script.js"></script>
     <script src="./theme-ui.js"></script>
   </body>

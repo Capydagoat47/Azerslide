@@ -1,6 +1,6 @@
-services:
+﻿services:
   - type: web
-    name: knslides-ui
+    name: knslides-pro
     runtime: node
     plan: free
     buildCommand: npm install

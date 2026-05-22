@@ -1,8 +1,8 @@
-const themeToggle = document.querySelector("#theme-toggle");
+﻿const themeToggle = document.querySelector("#theme-toggle");
 const themeToggleIcon = document.querySelector("#theme-toggle-icon");
 const themeToggleText = document.querySelector("#theme-toggle-text");
 
-const THEME_STORAGE_KEY = "azerslide-ui-theme";
+const THEME_STORAGE_KEY = "knslides-pro-ui-theme";
 
 function getSavedTheme() {
   try {
@@ -31,7 +31,7 @@ function renderThemeToggle(theme) {
   themeToggle?.setAttribute("title", nextThemeLabel);
 
   if (themeToggleIcon) {
-    themeToggleIcon.textContent = isNight ? "\u2600" : "\u263E";
+    themeToggleIcon.textContent = isNight ? "☀" : "☾";
   }
 
   if (themeToggleText) {

@@ -1,9 +1,15 @@
-{
-  "name": "knslides-ui",
-  "version": "1.0.0",
+﻿{
+  "name": "knslides-pro",
+  "version": "2.0.0",
   "private": true,
-  "description": "KNSlides planner UI for Render hosting",
+  "description": "KNSlides Pro automatic lesson planner and PowerPoint generator for Azerbaijani schools",
   "scripts": {
     "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pdf-parse": "^1.1.1"
   }
 }
