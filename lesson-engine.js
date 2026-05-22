@@ -7,60 +7,59 @@
   globalScope.KNSLessonEngine = factory();
 })(typeof globalThis !== "undefined" ? globalThis : this, function createLessonEngine() {
   const curriculumSubjects = [
-    "AzÉ™rbaycan dili",
+    "Az\u0259rbaycan dili",
     "Riyaziyyat",
-    "HÉ™yat bilgisi",
-    "Ä°ngilis dili",
+    "H\u0259yat bilgisi",
+    "\u0130ngilis dili",
     "Rus dili",
-    "Ä°nformatika",
+    "\u0130nformatika",
     "Musiqi",
-    "TÉ™sviri incÉ™sÉ™nÉ™t",
-    "Fiziki tÉ™rbiyÉ™",
+    "T\u0259sviri inc\u0259s\u0259n\u0259t",
+    "Fiziki t\u0259rbiy\u0259",
     "Tarix",
-    "CoÄŸrafiya",
+    "Co\u011frafiya",
     "Biologiya",
     "Kimya",
     "Fizika",
   ];
 
-  const topicMarkers = ["mÃ¶vzu", "tema", "topic", "lesson", "dÉ™rs", "chapter", "bÃ¶lmÉ™"];
+  const topicMarkers = ["m\u00f6vzu", "tema", "topic", "lesson", "d\u0259rs", "chapter", "b\u00f6lm\u0259"];
   const activityMarkers = [
-    "tapÅŸÄ±rÄ±q",
-    "mÃ¼zakirÉ™",
+    "tap\u015f\u0131r\u0131q",
+    "m\u00fczakir\u0259",
     "oyun",
-    "fÉ™aliyyÉ™t",
+    "f\u0259aliyy\u0259t",
     "activity",
     "exercise",
     "practice",
     "sual",
     "problem",
-    "mÃ¼ÅŸahidÉ™",
-    "tÉ™crÃ¼bÉ™",
+    "m\u00fc\u015fahid\u0259",
+    "t\u0259cr\u00fcb\u0259",
   ];
+
   const stopwords = new Set([
-    "vÉ™",
-    "ilÉ™",
-    "Ã¼Ã§Ã¼n",
+    "v\u0259",
+    "il\u0259",
+    "\u00fc\u00e7\u00fcn",
     "olan",
     "olanlar",
-    "hÉ™m",
+    "h\u0259m",
     "bu",
     "bir",
     "iki",
-    "Ã¼Ã§",
-    "dÃ¶rd",
-    "beÅŸ",
+    "\u00fc\u00e7",
+    "d\u00f6rd",
+    "be\u015f",
     "kimi",
     "daha",
-    "Ã§ox",
+    "\u00e7ox",
     "az",
     "ya",
-    "vÉ™ya",
-    "vÉ™ya",
-    "ilÉ™",
+    "v\u0259ya",
     "sonra",
-    "É™gÉ™r",
-    "isÉ™",
+    "\u0259g\u0259r",
+    "is\u0259",
     "the",
     "and",
     "for",
@@ -70,11 +69,11 @@
     "have",
     "will",
     "lesson",
-    "mÃ¶vzu",
+    "m\u00f6vzu",
     "tema",
-    "dÉ™rs",
+    "d\u0259rs",
     "sinif",
-    "sÉ™hifÉ™",
+    "s\u0259hif\u0259",
   ]);
 
   function normalizeText(value) {
@@ -124,8 +123,8 @@
   }
 
   function splitLines(value) {
-    return String(value || "")
-      .split(/\r?\n+/)
+    return normalizeSourceText(value)
+      .split(/\n+/)
       .map((line) => normalizeText(line))
       .filter(Boolean);
   }
@@ -148,17 +147,17 @@
     if (primaryMode) {
       return {
         mode: "primary",
-        label: "ðŸŽ¨ Theme: Primary School Mode",
+        label: "\ud83c\udfa8 Theme: Primary School Mode",
         shortLabel: "Primary School Mode",
-        description: "1â€“4-cÃ¼ siniflÉ™r Ã¼Ã§Ã¼n daha rÉ™ngli, iri vÉ™ smartboard-friendly vizual dil.",
+        description: "1-4-c\u00fc sinifl\u0259r \u00fc\u00e7\u00fcn daha r\u0259ngli, iri v\u0259 smartboard-friendly vizual dil.",
       };
     }
 
     return {
       mode: "academic",
-      label: "ðŸŽ¨ Theme: Academic Mode",
+      label: "\ud83c\udfa8 Theme: Academic Mode",
       shortLabel: "Academic Mode",
-      description: "5â€“11-ci siniflÉ™r Ã¼Ã§Ã¼n daha sÉ™liqÉ™li, mÃ¼asir vÉ™ fokuslu tÉ™qdimat gÃ¶rÃ¼nÃ¼ÅŸÃ¼.",
+      description: "5-11-ci sinifl\u0259r \u00fc\u00e7\u00fcn daha s\u0259liq\u0259li, m\u00fcasir v\u0259 fokuslu t\u0259qdimat g\u00f6r\u00fcn\u00fc\u015f\u00fc.",
     };
   }
 
@@ -182,6 +181,11 @@
       return directTopic;
     }
 
+    const normalizedFallback = normalizeText(fallbackTopic);
+    if (normalizedFallback) {
+      return normalizedFallback;
+    }
+
     const lines = splitLines(text);
     const candidate = lines.find((line) => {
       if (line.length < 6 || line.length > 90) {
@@ -192,7 +196,7 @@
       return !folded.includes(foldText(subject)) && !/^\d+$/.test(line);
     });
 
-    return normalizeText(fallbackTopic) || candidate || "";
+    return candidate || "";
   }
 
   function extractTitle(text, subject, topic) {
@@ -202,12 +206,12 @@
     }
 
     if (normalizeText(topic)) {
-      return `${subject} â€” ${normalizeText(topic)}`;
+      return `${subject} - ${normalizeText(topic)}`;
     }
 
     const lines = splitLines(text);
     const firstUseful = lines.find((line) => line.length >= 8 && line.length <= 100);
-    return firstUseful || `${subject} dÉ™rsi`;
+    return firstUseful || `${subject} d\u0259rsi`;
   }
 
   function tokenize(text) {
@@ -216,6 +220,11 @@
       .split(/\s+/)
       .map((word) => normalizeText(word))
       .filter((word) => word.length >= 3 && !stopwords.has(word));
+  }
+
+  function capitalizeWord(word) {
+    const normalized = normalizeText(word);
+    return normalized ? normalized.charAt(0).toLocaleUpperCase("az") + normalized.slice(1) : "";
   }
 
   function extractKeywords(text, topic) {
@@ -232,24 +241,13 @@
       .map(([word]) => word);
 
     const topicWords = tokenize(topic).slice(0, 3);
-    return uniq([
-      ...topicWords.map(capitalizeWord),
-      ...ranked.map(capitalizeWord),
-    ]).slice(0, 8);
-  }
-
-  function capitalizeWord(word) {
-    const normalized = normalizeText(word);
-    return normalized ? normalized.charAt(0).toLocaleUpperCase("az") + normalized.slice(1) : "";
+    return uniq([...topicWords.map(capitalizeWord), ...ranked.map(capitalizeWord)]).slice(0, 8);
   }
 
   function extractQuestions(text) {
     const lines = splitLines(text);
     const explicit = lines.filter(
-      (line) =>
-        line.includes("?") ||
-        /^(sual|question)\b/i.test(line) ||
-        /^\d+\./.test(line),
+      (line) => line.includes("?") || /^(sual|question)\b/i.test(line) || /^\d+\./.test(line),
     );
 
     return uniq(explicit).slice(0, 5);
@@ -268,11 +266,11 @@
     const conceptLines = lines.filter((line) => {
       const folded = foldText(line);
       return (
-        folded.startsWith("anlayÄ±ÅŸ") ||
+        folded.startsWith("anlay\u0131\u015f") ||
         folded.startsWith("qayda") ||
-        folded.startsWith("tÉ™rif") ||
+        folded.startsWith("t\u0259rif") ||
         folded.startsWith("vacib") ||
-        folded.startsWith("É™sas")
+        folded.startsWith("\u0259sas")
       );
     });
 
@@ -281,17 +279,17 @@
     }
 
     return uniq(
-      keywords.slice(0, 5).map((keyword) => `${keyword} anlayÄ±ÅŸÄ± Ã¼zÉ™rindÉ™ dayanmaq`),
+      keywords.slice(0, 5).map((keyword) => `${keyword} anlay\u0131\u015f\u0131 \u00fcz\u0259rind\u0259 dayanmaq`),
     );
   }
 
   function buildTeacherFill(primaryMode, smartboardMode) {
     const base = primaryMode
-      ? ["Vizual material", "QÄ±sa izah", "Åžagird aktivliyi"]
-      : ["Ä°zah vÉ™ nÃ¼munÉ™", "MÃ¼zakirÉ™ suallarÄ±", "TapÅŸÄ±rÄ±q vÉ™ yoxlama"];
+      ? ["Vizual material", "Q\u0131sa izah", "\u015eagird aktivliyi"]
+      : ["\u0130zah v\u0259 n\u00fcmun\u0259", "M\u00fczakir\u0259 suallar\u0131", "Tap\u015f\u0131r\u0131q v\u0259 yoxlama"];
 
     if (smartboardMode) {
-      return uniq([...base, "Ä°ri vÉ™ aydÄ±n tÉ™qdimat elementlÉ™ri"]);
+      return uniq([...base, "\u0130ri v\u0259 ayd\u0131n t\u0259qdimat elementl\u0259ri"]);
     }
 
     return base;
@@ -309,121 +307,124 @@
 
   function mathLabel(topic) {
     const folded = foldText(topic);
-    if (folded.includes("kÉ™sr")) {
-      return "KÉ™srlÉ™r";
+    if (folded.includes("k\u0259sr")) {
+      return "K\u0259srl\u0259r";
     }
     if (folded.includes("faiz")) {
-      return "FaizlÉ™r";
+      return "Faizl\u0259r";
     }
-    if (folded.includes("ondalÄ±q")) {
-      return "OndalÄ±q kÉ™srlÉ™r";
+    if (folded.includes("ondal\u0131q")) {
+      return "Ondal\u0131q k\u0259srl\u0259r";
     }
-    if (folded.includes("tÉ™nlik")) {
-      return "TÉ™nliklÉ™r";
+    if (folded.includes("t\u0259nlik")) {
+      return "T\u0259nlikl\u0259r";
     }
 
-    return normalizeText(topic) || "MÃ¶vzu";
+    return normalizeText(topic) || "M\u00f6vzu";
   }
 
   function buildLanguageSections(primaryMode, topic, concepts, activities, teacherFill) {
-    const focusPool = concepts.length ? concepts : [topic || "MÉ™tn Ã¼zÉ™rindÉ™ iÅŸ"];
+    const focusPool = concepts.length ? concepts : [topic || "M\u0259tn \u00fcz\u0259rind\u0259 i\u015f"];
+
     return [
       buildSection(
         "Motivasiya",
-        "DÉ™rsi mÃ¶vzuya baÄŸlayan qÄ±sa danÄ±ÅŸÄ±q, ÅŸÉ™kil vÉ™ ya sual ilÉ™ baÅŸlamaq.",
+        "D\u0259rsi m\u00f6vzuya ba\u011flayan q\u0131sa dan\u0131\u015f\u0131q, \u015f\u0259kil v\u0259 ya sual il\u0259 ba\u015flamaq.",
         teacherFill,
-        [topic || "MÃ¶vzuya giriÅŸ", ...activities],
+        [topic || "M\u00f6vzuya giri\u015f", ...activities],
       ),
       buildSection(
-        "DinlÉ™yib anlama",
-        "MÉ™tn vÉ™ ya audio ilÉ™ dinlÉ™mÉ™ tapÅŸÄ±rÄ±ÄŸÄ± qurmaq.",
+        "Dinl\u0259yib anlama",
+        "M\u0259tn v\u0259 ya audio il\u0259 dinl\u0259m\u0259 tap\u015f\u0131r\u0131\u011f\u0131 qurmaq.",
         teacherFill,
         focusPool,
       ),
       buildSection(
         "Oxuyub anlama",
-        "Oxu zamanÄ± É™sas fikri vÉ™ detallarÄ±n tutulmasÄ±na kÃ¶mÉ™k etmÉ™k.",
+        "Oxu zaman\u0131 \u0259sas fikri v\u0259 detallar\u0131n tutulmas\u0131na k\u00f6m\u0259k etm\u0259k.",
         teacherFill,
         focusPool,
       ),
       buildSection(
-        primaryMode ? "SÃ¶z Ã¼zÉ™rindÉ™ iÅŸ" : "Dil qaydasÄ± vÉ™ sÃ¶z iÅŸi",
-        "Yeni sÃ¶zlÉ™ri, ifadÉ™lÉ™ri vÉ™ dil vahidlÉ™rini vurÄŸulamaq.",
+        primaryMode ? "S\u00f6z \u00fcz\u0259rind\u0259 i\u015f" : "Dil qaydas\u0131 v\u0259 s\u00f6z i\u015fi",
+        "Yeni s\u00f6zl\u0259ri, ifad\u0259l\u0259ri v\u0259 dil vahidl\u0259rini vur\u011fulamaq.",
         teacherFill,
         concepts,
       ),
       buildSection(
-        "TapÅŸÄ±rÄ±q",
-        "MÉ™tnlÉ™ baÄŸlÄ± fÉ™rdi vÉ™ ya qrup tapÅŸÄ±rÄ±qlarÄ± yerlÉ™ÅŸdirmÉ™k.",
+        "Tap\u015f\u0131r\u0131q",
+        "M\u0259tnl\u0259 ba\u011fl\u0131 f\u0259rdi v\u0259 ya qrup tap\u015f\u0131r\u0131qlar\u0131 yerl\u0259\u015fdirm\u0259k.",
         teacherFill,
         activities,
       ),
       buildSection(
         "Refleksiya",
-        "Sonda Ã¶zÃ¼nÃ¼qiymÉ™tlÉ™ndirmÉ™ vÉ™ qÄ±sa yekun suallarÄ± vermÉ™k.",
+        "Sonda \u00f6z\u00fcn\u00fcqiym\u0259tl\u0259ndirm\u0259 v\u0259 q\u0131sa yekun suallar\u0131 verm\u0259k.",
         teacherFill,
-        ["Bu gÃ¼n nÉ™ Ã¶yrÉ™ndik?", "Ã‡É™tin olan hissÉ™ nÉ™ idi?"],
+        ["Bu g\u00fcn n\u0259 \u00f6yr\u0259ndik?", "\u00c7\u0259tin olan hiss\u0259 n\u0259 idi?"],
       ),
     ];
   }
 
   function buildMathSections(primaryMode, topic, keywords, activities, teacherFill) {
     const topicLabel = mathLabel(topic);
+
     return [
       buildSection(
         "Motivasiya",
-        "GÃ¼ndÉ™lik hÉ™yatdan mÃ¶vzuya giriÅŸ edÉ™n qÄ±sa problem vÉ™ ya vizual nÃ¼munÉ™ seÃ§mÉ™k.",
+        "G\u00fcnd\u0259lik h\u0259yatdan m\u00f6vzuya giri\u015f ed\u0259n q\u0131sa problem v\u0259 ya vizual n\u00fcmun\u0259 se\u00e7m\u0259k.",
         teacherFill,
         [topicLabel, ...keywords],
       ),
       buildSection(
-        "MÃ¶vzunun izahÄ±",
-        "Yeni qaydanÄ± mÉ™rhÉ™lÉ™li vÉ™ aydÄ±n formada gÃ¶stÉ™rmÉ™k.",
+        "M\u00f6vzunun izah\u0131",
+        "Yeni qaydan\u0131 m\u0259rh\u0259l\u0259li v\u0259 ayd\u0131n formada g\u00f6st\u0259rm\u0259k.",
         teacherFill,
-        [`${topicLabel} qaydasÄ±`, ...keywords],
+        [`${topicLabel} qaydas\u0131`, ...keywords],
       ),
       buildSection(
-        primaryMode ? "NÃ¼munÉ™lÉ™r" : "Misallar vÉ™ nÃ¼munÉ™lÉ™r",
-        "Æn azÄ± iki model nÃ¼munÉ™ ilÉ™ hÉ™ll yolunu gÃ¶stÉ™rmÉ™k.",
+        primaryMode ? "N\u00fcmun\u0259l\u0259r" : "Misallar v\u0259 n\u00fcmun\u0259l\u0259r",
+        "\u018fn az\u0131 iki model n\u00fcmun\u0259 il\u0259 h\u0259ll yolunu g\u00f6st\u0259rm\u0259k.",
         teacherFill,
         keywords,
       ),
       buildSection(
         "Praktika",
-        "ÅžagirdlÉ™rin hÉ™ll etmÉ™si Ã¼Ã§Ã¼n tapÅŸÄ±rÄ±qlar vÉ™ qrup iÅŸi yerlÉ™ÅŸdirmÉ™k.",
+        "\u015eagirdl\u0259rin h\u0259ll etm\u0259si \u00fc\u00e7\u00fcn tap\u015f\u0131r\u0131qlar v\u0259 qrup i\u015fi yerl\u0259\u015fdirm\u0259k.",
         teacherFill,
         activities,
       ),
       buildSection(
-        primaryMode ? "Oyun" : "Yoxlama tapÅŸÄ±rÄ±ÄŸÄ±",
+        primaryMode ? "Oyun" : "Yoxlama tap\u015f\u0131r\u0131\u011f\u0131",
         primaryMode
-          ? "MÃ¶vzuya uyÄŸun oyunvari fÉ™aliyyÉ™t vÉ™ ya yarÄ±ÅŸ hazÄ±rlamaq."
-          : "Yoxlama Ã¼Ã§Ã¼n qÄ±sa mÃ¼stÉ™qil tapÅŸÄ±rÄ±q É™lavÉ™ etmÉ™k.",
+          ? "M\u00f6vzuya uy\u011fun oyunvari f\u0259aliyy\u0259t v\u0259 ya yar\u0131\u015f haz\u0131rlamaq."
+          : "Yoxlama \u00fc\u00e7\u00fcn q\u0131sa m\u00fcst\u0259qil tap\u015f\u0131r\u0131q \u0259lav\u0259 etm\u0259k.",
         teacherFill,
-        activities.length ? activities : ["SÃ¼rÉ™tli yoxlama", "CÃ¼tlÉ™rlÉ™ hÉ™ll"],
+        activities.length ? activities : ["S\u00fcr\u0259tli yoxlama", "C\u00fctl\u0259rl\u0259 h\u0259ll"],
       ),
       buildSection(
         "Refleksiya",
-        "Sonda qaydanÄ±n necÉ™ iÅŸlÉ™ndiyini qÄ±sa yekunla baÄŸlamaq.",
+        "Sonda qaydan\u0131n nec\u0259 i\u015fl\u0259ndiyini q\u0131sa yekunla ba\u011flamaq.",
         teacherFill,
-        ["BugÃ¼nkÃ¼ qayda", "Æn uÄŸurlu hÉ™ll Ã¼sulu"],
+        ["Bug\u00fcnk\u00fc qayda", "\u018fn u\u011furlu h\u0259ll \u00fcsulu"],
       ),
     ];
   }
 
   function buildForeignLanguageSections(primaryMode, keywords, activities, teacherFill) {
     const finalSectionTitle = primaryMode ? "Game" : "Practice";
+
     return [
-      buildSection("Warm-up", "MÃ¶vzuya giriÅŸ Ã¼Ã§Ã¼n qÄ±sa danÄ±ÅŸÄ±q vÉ™ ya ÅŸÉ™kil fÉ™aliyyÉ™ti.", teacherFill, keywords),
-      buildSection("Vocabulary", "Yeni sÃ¶zlÉ™ri vÉ™ ifadÉ™lÉ™ri sistemli ÅŸÉ™kildÉ™ tÉ™qdim etmÉ™k.", teacherFill, keywords),
-      buildSection("Reading", "QÄ±sa mÉ™tn Ã¼zÉ™rindÉ™ baÅŸa dÃ¼ÅŸmÉ™ iÅŸi qurmaq.", teacherFill, activities),
-      buildSection("Listening", "Audio vÉ™ ya mÃ¼É™llim oxusu ilÉ™ dinlÉ™mÉ™ tapÅŸÄ±rÄ±ÄŸÄ± vermÉ™k.", teacherFill, activities),
-      buildSection("Speaking", "CÃ¼t vÉ™ ya qrup danÄ±ÅŸÄ±q fÉ™aliyyÉ™ti tÉ™ÅŸkil etmÉ™k.", teacherFill, activities),
+      buildSection("Warm-up", "M\u00f6vzuya giri\u015f \u00fc\u00e7\u00fcn q\u0131sa dan\u0131\u015f\u0131q v\u0259 ya \u015f\u0259kil f\u0259aliyy\u0259ti.", teacherFill, keywords),
+      buildSection("Vocabulary", "Yeni s\u00f6zl\u0259ri v\u0259 ifad\u0259l\u0259ri sistemli \u015f\u0259kild\u0259 t\u0259qdim etm\u0259k.", teacherFill, keywords),
+      buildSection("Reading", "Q\u0131sa m\u0259tn \u00fcz\u0259rind\u0259 ba\u015fa d\u00fc\u015fm\u0259 i\u015fi qurmaq.", teacherFill, activities),
+      buildSection("Listening", "Audio v\u0259 ya m\u00fc\u0259llim oxusu il\u0259 dinl\u0259m\u0259 tap\u015f\u0131r\u0131\u011f\u0131 verm\u0259k.", teacherFill, activities),
+      buildSection("Speaking", "C\u00fct v\u0259 ya qrup dan\u0131\u015f\u0131q f\u0259aliyy\u0259ti t\u0259\u015fkil etm\u0259k.", teacherFill, activities),
       buildSection(
         finalSectionTitle,
         primaryMode
-          ? "Oyuna É™saslanan tapÅŸÄ±rÄ±qla mÃ¶vzunu mÃ¶hkÉ™mlÉ™ndirmÉ™k."
-          : "MÃ¶vzunu praktik tÉ™tbiq edÉ™n tapÅŸÄ±rÄ±qla dÉ™rsi toplamaq.",
+          ? "Oyuna \u0259saslanan tap\u015f\u0131r\u0131qla m\u00f6vzunu m\u00f6hk\u0259ml\u0259ndirm\u0259k."
+          : "M\u00f6vzunu praktik t\u0259tbiq ed\u0259n tap\u015f\u0131r\u0131qla d\u0259rsi toplamaq.",
         teacherFill,
         activities,
       ),
@@ -432,156 +433,151 @@
 
   function buildScienceSections(primaryMode, topic, concepts, activities, teacherFill) {
     return [
-      buildSection("Motivasiya", "MÃ¶vzuya aid maraqlÄ± fakt, ÅŸÉ™kil vÉ™ ya mÃ¼ÅŸahidÉ™ ilÉ™ baÅŸlamaq.", teacherFill, [topic]),
-      buildSection("MÃ¶vzunun izahÄ±", "Æsas anlayÄ±ÅŸlarÄ± ardÄ±cÄ±l ÅŸÉ™kildÉ™ tÉ™qdim etmÉ™k.", teacherFill, concepts),
+      buildSection("Motivasiya", "M\u00f6vzuya aid maraql\u0131 fakt, \u015f\u0259kil v\u0259 ya m\u00fc\u015fahid\u0259 il\u0259 ba\u015flamaq.", teacherFill, [topic]),
+      buildSection("M\u00f6vzunun izah\u0131", "\u018fsas anlay\u0131\u015flar\u0131 ard\u0131c\u0131l \u015f\u0259kild\u0259 t\u0259qdim etm\u0259k.", teacherFill, concepts),
       buildSection(
-        primaryMode ? "Vacib anlayÄ±ÅŸlar" : "Qayda vÉ™ É™sas anlayÄ±ÅŸlar",
-        "TerminlÉ™ri vÉ™ É™laqÉ™lÉ™ri vizual ÅŸÉ™kildÉ™ gÃ¶stÉ™rmÉ™k.",
+        primaryMode ? "Vacib anlay\u0131\u015flar" : "Qayda v\u0259 \u0259sas anlay\u0131\u015flar",
+        "Terminl\u0259ri v\u0259 \u0259laq\u0259l\u0259ri vizual \u015f\u0259kild\u0259 g\u00f6st\u0259rm\u0259k.",
         teacherFill,
         concepts,
       ),
       buildSection(
-        primaryMode ? "Praktik fÉ™aliyyÉ™t" : "TÉ™crÃ¼bÉ™ vÉ™ mÃ¼ÅŸahidÉ™",
-        "MÃ¼ÅŸahidÉ™, tÉ™crÃ¼bÉ™ vÉ™ ya nÃ¼mayiÅŸ hissÉ™sini hazÄ±rlamaq.",
+        primaryMode ? "Praktik f\u0259aliyy\u0259t" : "T\u0259cr\u00fcb\u0259 v\u0259 m\u00fc\u015fahid\u0259",
+        "M\u00fc\u015fahid\u0259, t\u0259cr\u00fcb\u0259 v\u0259 ya n\u00fcmayi\u015f hiss\u0259sini haz\u0131rlamaq.",
         teacherFill,
         activities,
       ),
-      buildSection("TapÅŸÄ±rÄ±q", "MÃ¶vzu Ã¼zrÉ™ mÃ¶hkÉ™mlÉ™ndirmÉ™ tapÅŸÄ±rÄ±qlarÄ± yerlÉ™ÅŸdirmÉ™k.", teacherFill, activities),
-      buildSection("Refleksiya", "Æsas nÉ™ticÉ™lÉ™ri ÅŸagirdlÉ™rlÉ™ birlikdÉ™ yekunlaÅŸdÄ±rmaq.", teacherFill, concepts),
+      buildSection("Tap\u015f\u0131r\u0131q", "M\u00f6vzu \u00fczr\u0259 m\u00f6hk\u0259ml\u0259ndirm\u0259 tap\u015f\u0131r\u0131qlar\u0131 yerl\u0259\u015fdirm\u0259k.", teacherFill, activities),
+      buildSection("Refleksiya", "\u018fsas n\u0259tic\u0259l\u0259ri \u015fagirdl\u0259rl\u0259 birlikd\u0259 yekunla\u015fd\u0131rmaq.", teacherFill, concepts),
     ];
   }
 
   function buildHistoryGeographySections(subject, concepts, activities, teacherFill) {
-    const spatial = foldText(subject).includes("coÄŸrafiya");
+    const spatial = foldText(subject).includes(foldText("Co\u011frafiya"));
+
     return [
-      buildSection("Motivasiya", "ÅžÉ™kil, xÉ™ritÉ™, hadisÉ™ vÉ™ ya sual ilÉ™ mÃ¶vzuya giriÅŸ etmÉ™k.", teacherFill, concepts),
-      buildSection("MÃ¶vzunun izahÄ±", "MÉ™lumatÄ± sÉ™bÉ™b-nÉ™ticÉ™ vÉ™ ya mÉ™kan É™laqÉ™si ilÉ™ tÉ™qdim etmÉ™k.", teacherFill, concepts),
+      buildSection("Motivasiya", "\u015e\u0259kil, x\u0259rit\u0259, hadis\u0259 v\u0259 ya sual il\u0259 m\u00f6vzuya giri\u015f etm\u0259k.", teacherFill, concepts),
+      buildSection("M\u00f6vzunun izah\u0131", "M\u0259lumat\u0131 s\u0259b\u0259b-n\u0259tic\u0259 v\u0259 ya m\u0259kan \u0259laq\u0259si il\u0259 t\u0259qdim etm\u0259k.", teacherFill, concepts),
       buildSection(
-        spatial ? "XÉ™ritÉ™ vÉ™ mÉ™kanla iÅŸ" : "MÉ™nbÉ™ vÉ™ zaman xÉ™tti",
+        spatial ? "X\u0259rit\u0259 v\u0259 m\u0259kanla i\u015f" : "M\u0259nb\u0259 v\u0259 zaman x\u0259tti",
         spatial
-          ? "XÉ™ritÉ™, sxem vÉ™ mÃ¼qayisÉ™ vasitÉ™silÉ™ mÉ™kan É™laqÉ™lÉ™rini gÃ¶stÉ™rmÉ™k."
-          : "Tarixi mÉ™nbÉ™, tarixlÉ™r vÉ™ xronologiya ilÉ™ iÅŸlÉ™mÉ™k.",
+          ? "X\u0259rit\u0259, sxem v\u0259 m\u00fcqayis\u0259 vasit\u0259sil\u0259 m\u0259kan \u0259laq\u0259l\u0259rini g\u00f6st\u0259rm\u0259k."
+          : "Tarixi m\u0259nb\u0259, tarixl\u0259r v\u0259 xronologiya il\u0259 i\u015fl\u0259m\u0259k.",
         teacherFill,
         activities,
       ),
-      buildSection("MÃ¼zakirÉ™", "ÅžagirdlÉ™rin sÉ™bÉ™b, nÉ™ticÉ™ vÉ™ mÃ¶vqe bildirmÉ™sini tÉ™ÅŸviq etmÉ™k.", teacherFill, activities),
-      buildSection("TapÅŸÄ±rÄ±q", "MÃ¶vzu Ã¼zrÉ™ tÉ™tbiq vÉ™ araÅŸdÄ±rma tapÅŸÄ±rÄ±ÄŸÄ± qurmaq.", teacherFill, activities),
-      buildSection("Refleksiya", "Yekun sual vÉ™ qÄ±sa Ã¶zÃ¼nÃ¼qiymÉ™tlÉ™ndirmÉ™ aparmaq.", teacherFill, concepts),
+      buildSection("M\u00fczakir\u0259", "\u015eagirdl\u0259rin s\u0259b\u0259b, n\u0259tic\u0259 v\u0259 m\u00f6vqe bildirm\u0259sini t\u0259\u015fviq etm\u0259k.", teacherFill, activities),
+      buildSection("Tap\u015f\u0131r\u0131q", "M\u00f6vzu \u00fczr\u0259 t\u0259tbiq v\u0259 ara\u015fd\u0131rma tap\u015f\u0131r\u0131\u011f\u0131 qurmaq.", teacherFill, activities),
+      buildSection("Refleksiya", "Yekun sual v\u0259 q\u0131sa \u00f6z\u00fcn\u00fcqiym\u0259tl\u0259ndirm\u0259 aparmaq.", teacherFill, concepts),
     ];
   }
 
   function buildArtSections(subject, primaryMode, teacherFill) {
-    const music = foldText(subject).includes("musiqi");
+    const music = foldText(subject).includes(foldText("Musiqi"));
+
     return [
-      buildSection("Motivasiya", "DÉ™rsÉ™ qÄ±sa emosional giriÅŸ qurmaq.", teacherFill, [music ? "Ritm" : "Vizual diqqÉ™t"]),
+      buildSection("Motivasiya", "D\u0259rs\u0259 q\u0131sa emosional giri\u015f qurmaq.", teacherFill, [music ? "Ritm" : "Vizual diqq\u0259t"]),
       buildSection(
-        music ? "DinlÉ™mÉ™ vÉ™ mÃ¼ÅŸahidÉ™" : "NÃ¼mayiÅŸ vÉ™ mÃ¼ÅŸahidÉ™",
-        music
-          ? "Musiqi nÃ¼munÉ™sini vÉ™ onun hissÉ™lÉ™rini dinlÉ™tmÉ™k."
-          : "NÃ¼munÉ™ iÅŸ vÉ™ texnikanÄ± gÃ¶stÉ™rmÉ™k.",
+        music ? "Dinl\u0259m\u0259 v\u0259 m\u00fc\u015fahid\u0259" : "N\u00fcmayi\u015f v\u0259 m\u00fc\u015fahid\u0259",
+        music ? "Musiqi n\u00fcmun\u0259sini v\u0259 onun hiss\u0259l\u0259rini dinl\u0259tm\u0259k." : "N\u00fcmun\u0259 i\u015f v\u0259 texnikan\u0131 g\u00f6st\u0259rm\u0259k.",
         teacherFill,
-        ["NÃ¼munÉ™", "MÃ¼ÅŸahidÉ™"],
+        ["N\u00fcmun\u0259", "M\u00fc\u015fahid\u0259"],
       ),
       buildSection(
-        music ? "Ä°zah vÉ™ ritm iÅŸi" : "Texnika vÉ™ izah",
-        "Æsas Ã¼sullarÄ± vÉ™ qaydalarÄ± ÅŸagirdÉ™ aydÄ±nlaÅŸdÄ±rmaq.",
+        music ? "\u0130zah v\u0259 ritm i\u015fi" : "Texnika v\u0259 izah",
+        "\u018fsas \u00fcsullar\u0131 v\u0259 qaydalar\u0131 \u015fagird\u0259 ayd\u0131nla\u015fd\u0131rmaq.",
         teacherFill,
-        ["Æsas texnika", "Ä°cra qaydasÄ±"],
+        ["\u018fsas texnika", "\u0130cra qaydas\u0131"],
       ),
       buildSection(
-        primaryMode ? "YaradÄ±cÄ±lÄ±q vaxtÄ±" : "Praktik fÉ™aliyyÉ™t",
-        "FÉ™rdi vÉ™ ya qrup iÅŸi Ã¼Ã§Ã¼n yaradÄ±cÄ± mÉ™kan vermÉ™k.",
+        primaryMode ? "Yarad\u0131c\u0131l\u0131q vaxt\u0131" : "Praktik f\u0259aliyy\u0259t",
+        "F\u0259rdi v\u0259 ya qrup i\u015fi \u00fc\u00e7\u00fcn yarad\u0131c\u0131 m\u0259kan verm\u0259k.",
         teacherFill,
-        ["YaradÄ±cÄ± iÅŸ", "TÉ™qdimat"],
+        ["Yarad\u0131c\u0131 i\u015f", "T\u0259qdimat"],
       ),
-      buildSection("PaylaÅŸÄ±m", "Ä°ÅŸlÉ™rin nÃ¼mayiÅŸi vÉ™ qarÅŸÄ±lÄ±qlÄ± fikir bildirmÉ™ aparmaq.", teacherFill, ["TÉ™qdimat", "RÉ™y"]),
-      buildSection("Refleksiya", "Yekunda nÉ™yin uÄŸurlu alÄ±ndÄ±ÄŸÄ±nÄ± toplamaq.", teacherFill, ["Ã–zÃ¼nÃ¼qiymÉ™tlÉ™ndirmÉ™"]),
+      buildSection("Payla\u015f\u0131m", "\u0130\u015fl\u0259rin n\u00fcmayi\u015fi v\u0259 qar\u015f\u0131l\u0131ql\u0131 fikir bildirm\u0259 aparmaq.", teacherFill, ["T\u0259qdimat", "R\u0259y"]),
+      buildSection("Refleksiya", "Yekunda n\u0259yin u\u011furlu al\u0131nd\u0131\u011f\u0131n\u0131 toplamaq.", teacherFill, ["\u00d6z\u00fcn\u00fcqiym\u0259tl\u0259ndirm\u0259"]),
     ];
   }
 
   function buildPeSections(primaryMode, teacherFill) {
     return [
-      buildSection("Motivasiya", "DÉ™rsÉ™ qayda vÉ™ tÉ™hlÃ¼kÉ™sizlik xatÄ±rlatmasÄ± ilÉ™ baÅŸlamaq.", teacherFill, ["Ä°sinmÉ™", "Qayda"]),
-      buildSection("Ä°sinmÉ™", "ÆzÉ™lÉ™lÉ™ri hazÄ±rlayan qÄ±sa isinmÉ™ mÉ™rhÉ™lÉ™si qurmaq.", teacherFill, ["Ä°sinmÉ™ hÉ™rÉ™kÉ™tlÉ™ri"]),
-      buildSection("Texnika", "Æsas hÉ™rÉ™kÉ™t vÉ™ ya oyun texnikasÄ±nÄ± gÃ¶stÉ™rmÉ™k.", teacherFill, ["NÃ¼mayiÅŸ", "MÉ™rhÉ™lÉ™li izah"]),
+      buildSection("Motivasiya", "D\u0259rs\u0259 qayda v\u0259 t\u0259hl\u00fck\u0259sizlik xat\u0131rlatmas\u0131 il\u0259 ba\u015flamaq.", teacherFill, ["\u0130sinm\u0259", "Qayda"]),
+      buildSection("\u0130sinm\u0259", "\u018fz\u0259l\u0259l\u0259ri haz\u0131rlayan q\u0131sa isinm\u0259 m\u0259rh\u0259l\u0259si qurmaq.", teacherFill, ["\u0130sinm\u0259 h\u0259r\u0259k\u0259tl\u0259ri"]),
+      buildSection("Texnika", "\u018fsas h\u0259r\u0259k\u0259t v\u0259 ya oyun texnikas\u0131n\u0131 g\u00f6st\u0259rm\u0259k.", teacherFill, ["N\u00fcmayi\u015f", "M\u0259rh\u0259l\u0259li izah"]),
       buildSection(
-        primaryMode ? "Oyun vÉ™ hÉ™rÉ™kÉ™t" : "MÉ™ÅŸq vÉ™ tÉ™tbiq",
-        "TÉ™tbiq vÉ™ komanda iÅŸi Ã¼Ã§Ã¼n geniÅŸ praktik hissÉ™ yaratmaq.",
+        primaryMode ? "Oyun v\u0259 h\u0259r\u0259k\u0259t" : "M\u0259\u015fq v\u0259 t\u0259tbiq",
+        "T\u0259tbiq v\u0259 komanda i\u015fi \u00fc\u00e7\u00fcn geni\u015f praktik hiss\u0259 yaratmaq.",
         teacherFill,
-        ["Praktika", "Komanda iÅŸi"],
+        ["Praktika", "Komanda i\u015fi"],
       ),
-      buildSection("Yoxlama", "BacarÄ±qlarÄ±n icrasÄ±nÄ± mÃ¼ÅŸahidÉ™ vÉ™ qÄ±sa yoxlama ilÉ™ qiymÉ™tlÉ™ndirmÉ™k.", teacherFill, ["MÃ¼ÅŸahidÉ™"]),
-      buildSection("Refleksiya", "DÉ™rsi sakitlÉ™ÅŸmÉ™ vÉ™ qÄ±sa geribildirimlÉ™ baÄŸlamaq.", teacherFill, ["Geribildirim"]),
+      buildSection("Yoxlama", "Bacar\u0131qlar\u0131n icras\u0131n\u0131 m\u00fc\u015fahid\u0259 v\u0259 q\u0131sa yoxlama il\u0259 qiym\u0259tl\u0259ndirm\u0259k.", teacherFill, ["M\u00fc\u015fahid\u0259"]),
+      buildSection("Refleksiya", "D\u0259rsi sakitl\u0259\u015fm\u0259 v\u0259 q\u0131sa geribildiriml\u0259 ba\u011flamaq.", teacherFill, ["Geribildirim"]),
     ];
   }
 
   function buildDefaultSections(primaryMode, topic, concepts, activities, teacherFill) {
     return [
-      buildSection("Motivasiya", "MÃ¶vzuya maraqlÄ± giriÅŸ vÉ™ É™vvÉ™lki biliklÉ™ri aktivlÉ™ÅŸdirmÉ™k.", teacherFill, [topic]),
-      buildSection("MÃ¶vzunun izahÄ±", "Æsas mÉ™zmunu mÉ™rhÉ™lÉ™li ÅŸÉ™kildÉ™ tÉ™qdim etmÉ™k.", teacherFill, concepts),
+      buildSection("Motivasiya", "M\u00f6vzuya maraql\u0131 giri\u015f v\u0259 \u0259vv\u0259lki bilikl\u0259ri aktivl\u0259\u015fdirm\u0259k.", teacherFill, [topic]),
+      buildSection("M\u00f6vzunun izah\u0131", "\u018fsas m\u0259zmunu m\u0259rh\u0259l\u0259li \u015f\u0259kild\u0259 t\u0259qdim etm\u0259k.", teacherFill, concepts),
       buildSection(
-        primaryMode ? "Æsas anlayÄ±ÅŸlar" : "MÉ™tn vÉ™ É™sas anlayÄ±ÅŸlar",
-        "Vacib terminlÉ™ri vÉ™ fikirlÉ™ri qruplaÅŸdÄ±rmaq.",
+        primaryMode ? "\u018fsas anlay\u0131\u015flar" : "M\u0259tn v\u0259 \u0259sas anlay\u0131\u015flar",
+        "Vacib terminl\u0259ri v\u0259 fikirl\u0259ri qrupla\u015fd\u0131rmaq.",
         teacherFill,
         concepts,
       ),
-      buildSection("TapÅŸÄ±rÄ±q", "MÃ¶hkÉ™mlÉ™ndirmÉ™ vÉ™ tÉ™tbiq iÅŸi qurmaq.", teacherFill, activities),
+      buildSection("Tap\u015f\u0131r\u0131q", "M\u00f6hk\u0259ml\u0259ndirm\u0259 v\u0259 t\u0259tbiq i\u015fi qurmaq.", teacherFill, activities),
       buildSection(
-        primaryMode ? "Oyun vÉ™ aktivlik" : "MÃ¼zakirÉ™ vÉ™ yoxlama",
-        "ÅžagirdlÉ™rin iÅŸtirakÄ± ilÉ™ mÃ¶vzunu canlÄ± saxlamaq.",
+        primaryMode ? "Oyun v\u0259 aktivlik" : "M\u00fczakir\u0259 v\u0259 yoxlama",
+        "\u015eagirdl\u0259rin i\u015ftirak\u0131 il\u0259 m\u00f6vzunu canl\u0131 saxlamaq.",
         teacherFill,
         activities,
       ),
-      buildSection("Refleksiya", "DÉ™rs sonu yekun vÉ™ Ã¶zÃ¼nÃ¼qiymÉ™tlÉ™ndirmÉ™ aparmaq.", teacherFill, ["BugÃ¼nkÃ¼ nÉ™ticÉ™"]),
+      buildSection("Refleksiya", "D\u0259rs sonu yekun v\u0259 \u00f6z\u00fcn\u00fcqiym\u0259tl\u0259ndirm\u0259 aparmaq.", teacherFill, ["Bug\u00fcnk\u00fc n\u0259tic\u0259"]),
     ];
   }
 
-  function generateSections({ subject, primaryMode, topic, keywords, concepts, activities, smartboardMode }) {
-    const teacherFill = buildTeacherFill(primaryMode, smartboardMode);
-    const foldedSubject = foldText(subject);
+  function generateSections(input) {
+    const teacherFill = buildTeacherFill(input.primaryMode, input.smartboardMode);
+    const foldedSubject = foldText(input.subject);
 
-    if (foldedSubject === foldText("AzÉ™rbaycan dili")) {
-      return buildLanguageSections(primaryMode, topic, concepts, activities, teacherFill);
+    if (foldedSubject === foldText("Az\u0259rbaycan dili")) {
+      return buildLanguageSections(input.primaryMode, input.topic, input.concepts, input.activities, teacherFill);
     }
 
     if (foldedSubject === foldText("Riyaziyyat")) {
-      return buildMathSections(primaryMode, topic, keywords, activities, teacherFill);
+      return buildMathSections(input.primaryMode, input.topic, input.keywords, input.activities, teacherFill);
     }
 
-    if (
-      foldedSubject === foldText("Ä°ngilis dili") ||
-      foldedSubject === foldText("Rus dili")
-    ) {
-      return buildForeignLanguageSections(primaryMode, keywords, activities, teacherFill);
+    if (foldedSubject === foldText("\u0130ngilis dili") || foldedSubject === foldText("Rus dili")) {
+      return buildForeignLanguageSections(input.primaryMode, input.keywords, input.activities, teacherFill);
     }
 
-    if (
-      ["biologiya", "kimya", "fizika", "informatika", "hÉ™yat bilgisi"].includes(foldedSubject)
-    ) {
-      return buildScienceSections(primaryMode, topic, concepts, activities, teacherFill);
+    if ([foldText("Biologiya"), foldText("Kimya"), foldText("Fizika"), foldText("\u0130nformatika"), foldText("H\u0259yat bilgisi")].includes(foldedSubject)) {
+      return buildScienceSections(input.primaryMode, input.topic, input.concepts, input.activities, teacherFill);
     }
 
-    if (foldedSubject === foldText("Tarix") || foldedSubject === foldText("CoÄŸrafiya")) {
-      return buildHistoryGeographySections(subject, concepts, activities, teacherFill);
+    if (foldedSubject === foldText("Tarix") || foldedSubject === foldText("Co\u011frafiya")) {
+      return buildHistoryGeographySections(input.subject, input.concepts, input.activities, teacherFill);
     }
 
-    if (foldedSubject === foldText("Musiqi") || foldedSubject === foldText("TÉ™sviri incÉ™sÉ™nÉ™t")) {
-      return buildArtSections(subject, primaryMode, teacherFill);
+    if (foldedSubject === foldText("Musiqi") || foldedSubject === foldText("T\u0259sviri inc\u0259s\u0259n\u0259t")) {
+      return buildArtSections(input.subject, input.primaryMode, teacherFill);
     }
 
-    if (foldedSubject === foldText("Fiziki tÉ™rbiyÉ™")) {
-      return buildPeSections(primaryMode, teacherFill);
+    if (foldedSubject === foldText("Fiziki t\u0259rbiy\u0259")) {
+      return buildPeSections(input.primaryMode, teacherFill);
     }
 
-    return buildDefaultSections(primaryMode, topic, concepts, activities, teacherFill);
+    return buildDefaultSections(input.primaryMode, input.topic, input.concepts, input.activities, teacherFill);
   }
 
   function buildSourceSummary(sourceType, keywords, concepts, activities) {
     if (sourceType === "none") {
-      return "Struktur fÉ™nn, sinif vÉ™ mÃ¶vzuya É™sasÉ™n avtomatik quruldu.";
+      return "Struktur f\u0259nn, sinif v\u0259 m\u00f6vzuya \u0259sas\u0259n avtomatik quruldu.";
     }
 
-    return `MÉ™nbÉ™dÉ™n ${keywords.length} aÃ§ar sÃ¶z, ${concepts.length} anlayÄ±ÅŸ vÉ™ ${activities.length} fÉ™aliyyÉ™t ipucu seÃ§ildi.`;
+    return `M\u0259nb\u0259d\u0259n ${keywords.length} a\u00e7ar s\u00f6z, ${concepts.length} anlay\u0131\u015f v\u0259 ${activities.length} f\u0259aliyy\u0259t ipucu se\u00e7ildi.`;
   }
 
   function buildLessonPlan(options) {
@@ -615,7 +611,7 @@
       theme,
       smartboardMode: Boolean(options.smartboardMode),
       sourceType,
-      sourceLabel: normalizeText(options.sourceLabel) || "FÉ™nn vÉ™ mÃ¶vzu É™saslÄ± avtomatik quruluÅŸ",
+      sourceLabel: normalizeText(options.sourceLabel) || "F\u0259nn v\u0259 m\u00f6vzu \u0259sasl\u0131 avtomatik qurulu\u015f",
       sourceSummary: buildSourceSummary(sourceType, keywords, concepts, activities),
       excerpt: splitLines(sourceText).slice(0, 4).join(" "),
       keywords,
@@ -638,4 +634,3 @@
     buildLessonPlan,
   };
 });
-
