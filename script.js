@@ -1,5 +1,4 @@
-﻿const APP_NAME = "KNSlides Pro";
-const engine = window.KNSLessonEngine;
+﻿const engine = window.KNSLessonEngine;
 
 if (!engine) {
   throw new Error("KNSLessonEngine yüklənmədi.");
@@ -9,6 +8,7 @@ const form = document.querySelector("#planner-form");
 const subjectInput = document.querySelector("#subject-input");
 const gradeInput = document.querySelector("#grade-input");
 const topicInput = document.querySelector("#topic-input");
+const dailyPlanInput = document.querySelector("#daily-plan-input");
 const resourceUrlInput = document.querySelector("#resource-url-input");
 const pdfInput = document.querySelector("#pdf-input");
 const sourceTextInput = document.querySelector("#source-text-input");
@@ -58,12 +58,10 @@ function slugify(value) {
 
 function setMessage(message = "", tone = "info") {
   formMessage.textContent = message;
-
   if (!message || tone === "info") {
     delete formMessage.dataset.tone;
     return;
   }
-
   formMessage.dataset.tone = tone;
 }
 
@@ -79,35 +77,37 @@ function updateThemeIndicator() {
 
 function updateSmartboardIndicator() {
   const isEnabled = smartboardToggle.checked;
-  const label = isEnabled ? "🖥 Smart Board Mode: On" : "🖥 Smart Board Mode: Off";
-  const previewLabel = isEnabled ? "🖥 Smart Board: On" : "🖥 Smart Board: Off";
-
+  const label = isEnabled ? "🖥 Smart lövhə: aktiv" : "🖥 Smart lövhə: deaktiv";
   smartboardIndicator.textContent = label;
-  previewSmartboardBadge.textContent = previewLabel;
+  previewSmartboardBadge.textContent = label;
 }
 
 function updateResourceHint() {
-  const hasPdf = Boolean(pdfInput.files && pdfInput.files[0]);
-  const hasUrl = Boolean(normalizeText(resourceUrlInput.value));
-  const hasText = Boolean(normalizeText(sourceTextInput.value));
+  const parts = [];
 
-  if (hasPdf) {
-    resourceHint.textContent = "PDF seçilib. Plan qurularkən əvvəlcə yüklənmiş PDF analiz olunacaq.";
+  if (dailyPlanInput.files && dailyPlanInput.files[0]) {
+    parts.push("günlük dərs faylı seçilib");
+  }
+
+  if (resourceUrlInput.value.trim()) {
+    parts.push("TRIMS linki əlavə edilib");
+  }
+
+  if (pdfInput.files && pdfInput.files[0]) {
+    parts.push("dərslik faylı seçilib");
+  }
+
+  if (sourceTextInput.value.trim()) {
+    parts.push("mətn əlavə edilib");
+  }
+
+  if (!parts.length) {
+    resourceHint.textContent =
+      "Günlük dərs, TRIMS və dərslik mənbələri birlikdə istifadə oluna bilər. Fayl üçün PDF, DOCX və TXT dəstəklənir.";
     return;
   }
 
-  if (hasUrl) {
-    resourceHint.textContent = "TRIMS və ya mənbə linki daxil edilib. Məzmun əvvəlcə server üzərindən çıxarılacaq.";
-    return;
-  }
-
-  if (hasText) {
-    resourceHint.textContent = "Daxil edilən dərslik mətni analiz ediləcək və struktur həmin mətnə uyğun qurulacaq.";
-    return;
-  }
-
-  resourceHint.textContent =
-    "Mənbə əlavə edilməsə, KNSlides Pro yalnız fənn + sinif + mövzuya əsasən plan quracaq.";
+  resourceHint.textContent = `Hazırkı mənbələr: ${parts.join(", ")}. Bütün bu məlumatlar birlikdə analiz olunacaq.`;
 }
 
 function createInfoListItem(text) {
@@ -118,8 +118,8 @@ function createInfoListItem(text) {
 
 function renderList(target, values, fallbackText) {
   target.innerHTML = "";
-  const listValues = values.length ? values : [fallbackText];
-  listValues.forEach((value) => target.appendChild(createInfoListItem(value)));
+  const items = values.length ? values : [fallbackText];
+  items.forEach((value) => target.appendChild(createInfoListItem(value)));
 }
 
 function renderKeywords(values) {
@@ -183,30 +183,31 @@ function renderSlidePlan(plan) {
 
   slidePlan.appendChild(
     createSlideCard(
-      "SLAYD 1 — Başlıq slaydı",
-      "Dərsin adı, fənn, sinif və təqdimat tonu",
-      [plan.subject, plan.grade, plan.theme.shortLabel],
+      "SLAYD 1 — Başlıq",
+      "Dərsin adı, fənn, sinif və mövzu",
+      [plan.subject, plan.grade],
       plan.topic ? [plan.topic] : [],
     ),
   );
 
   slidePlan.appendChild(
     createSlideCard(
-      "SLAYD 2 — Dərsin marşrutu",
-      "Avtomatik qurulan bölmələr və keçid düymələri",
+      "SLAYD 2 — Dərsin planı",
+      "Təqdimatda istifadə olunacaq hissələrin ümumi görünüşü",
       plan.sections.map((section) => section.title),
-      plan.smartboardMode ? ["Smart Board üçün iri keçidlər"] : [],
+      plan.smartboardMode ? ["Smart lövhə üçün iri görünüş"] : [],
     ),
   );
 
   plan.sections.forEach((section, index) => {
-    const card = createSlideCard(
-      `SLAYD ${index + 3} — ${section.title}`,
-      section.prompt,
-      section.focus,
-      section.teacherFill,
+    slidePlan.appendChild(
+      createSlideCard(
+        `SLAYD ${index + 3} — ${section.title}`,
+        section.prompt,
+        section.focus,
+        section.teacherFill,
+      ),
     );
-    slidePlan.appendChild(card);
   });
 }
 
@@ -223,8 +224,8 @@ function renderPreview(plan) {
   sourceLabel.textContent = `Mənbə: ${plan.sourceLabel}`;
   previewThemeBadge.textContent = plan.theme.label;
   previewSmartboardBadge.textContent = plan.smartboardMode
-    ? "🖥 Smart Board: On"
-    : "🖥 Smart Board: Off";
+    ? "🖥 Smart lövhə: aktiv"
+    : "🖥 Smart lövhə: deaktiv";
 
   renderSlidePlan(plan);
   renderKeywords(plan.keywords);
@@ -259,13 +260,59 @@ async function extractTextFromPdf(file) {
     const page = await documentRef.getPage(pageNumber);
     const textContent = await page.getTextContent();
     const pageText = textContent.items.map((item) => item.str).join(" ");
-    pageTexts.push(normalizeText(pageText));
+    pageTexts.push(normalizeSourceInput(pageText));
   }
 
   return {
-    sourceText: pageTexts.join("\n"),
-    sourceLabel: `${file.name} (${documentRef.numPages} səhifə)` ,
+    sourceText: pageTexts.join("\n\n"),
+    sourceLabel: `${file.name} (${documentRef.numPages} səhifə)`,
     sourceType: "pdf",
+  };
+}
+
+async function extractTextFromDocx(file) {
+  if (!window.mammoth || typeof window.mammoth.extractRawText !== "function") {
+    throw new Error("DOCX oxuyucu yüklənmədi.");
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await window.mammoth.extractRawText({ arrayBuffer });
+
+  return {
+    sourceText: normalizeSourceInput(result.value || ""),
+    sourceLabel: file.name,
+    sourceType: "docx",
+  };
+}
+
+async function extractTextFromPlainFile(file) {
+  const text = await file.text();
+  return {
+    sourceText: normalizeSourceInput(text),
+    sourceLabel: file.name,
+    sourceType: "text",
+  };
+}
+
+async function extractTextFromSupportedFile(file) {
+  const lowerName = file.name.toLowerCase();
+
+  if (lowerName.endsWith(".pdf")) {
+    return extractTextFromPdf(file);
+  }
+
+  if (lowerName.endsWith(".docx")) {
+    return extractTextFromDocx(file);
+  }
+
+  if (lowerName.endsWith(".txt") || lowerName.endsWith(".md")) {
+    return extractTextFromPlainFile(file);
+  }
+
+  return {
+    sourceText: "",
+    sourceLabel: file.name,
+    sourceType: "unsupported",
   };
 }
 
@@ -285,47 +332,91 @@ async function fetchRemoteSource(url) {
 
   const payload = await response.json();
   return {
-    sourceText: payload.text || "",
+    sourceText: normalizeSourceInput(payload.text || ""),
     sourceLabel: payload.sourceLabel || url,
     sourceType: payload.sourceType || "url",
   };
 }
 
 async function collectSourceData() {
-  const manualText = normalizeSourceInput(sourceTextInput.value);
-  const remoteUrl = normalizeText(resourceUrlInput.value);
-  const selectedFile = pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
+  const sourceParts = [];
+  const warnings = [];
 
-  if (selectedFile) {
+  const dailyPlanFile = dailyPlanInput.files && dailyPlanInput.files[0] ? dailyPlanInput.files[0] : null;
+  const textbookFile = pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
+  const remoteUrl = normalizeText(resourceUrlInput.value);
+  const manualText = normalizeSourceInput(sourceTextInput.value);
+
+  if (dailyPlanFile) {
     try {
-      return await extractTextFromPdf(selectedFile);
+      const parsed = await extractTextFromSupportedFile(dailyPlanFile);
+      if (parsed.sourceText) {
+        sourceParts.push({
+          sourceText: parsed.sourceText,
+          sourceLabel: `Günlük dərs: ${parsed.sourceLabel}`,
+          sourceType: parsed.sourceType,
+        });
+      } else {
+        warnings.push("Günlük dərs faylı oxunmadı.");
+      }
     } catch (error) {
       console.error(error);
-      setMessage("PDF analiz olunmadı. Fallback olaraq digər məlumatlardan istifadə ediləcək.", "error");
+      warnings.push("Günlük dərs faylı tam oxunmadı.");
     }
   }
 
   if (remoteUrl) {
     try {
-      return await fetchRemoteSource(remoteUrl);
+      const parsed = await fetchRemoteSource(remoteUrl);
+      if (parsed.sourceText) {
+        sourceParts.push(parsed);
+      }
     } catch (error) {
       console.error(error);
-      setMessage("TRIMS və ya mənbə linki oxunmadı. Fallback olaraq digər məlumatlardan istifadə ediləcək.", "error");
+      warnings.push("TRIMS və ya link mənbəsi oxunmadı.");
+    }
+  }
+
+  if (textbookFile) {
+    try {
+      const parsed = await extractTextFromSupportedFile(textbookFile);
+      if (parsed.sourceText) {
+        sourceParts.push({
+          sourceText: parsed.sourceText,
+          sourceLabel: `Dərslik faylı: ${parsed.sourceLabel}`,
+          sourceType: parsed.sourceType,
+        });
+      } else {
+        warnings.push("Dərslik faylı oxunmadı.");
+      }
+    } catch (error) {
+      console.error(error);
+      warnings.push("Dərslik faylı tam oxunmadı.");
     }
   }
 
   if (manualText) {
-    return {
+    sourceParts.push({
       sourceText: manualText,
       sourceLabel: "Müəllimin daxil etdiyi dərslik mətni",
       sourceType: "text",
+    });
+  }
+
+  if (!sourceParts.length) {
+    return {
+      sourceText: "",
+      sourceLabel: "Fənn və mövzu əsaslı avtomatik quruluş",
+      sourceType: "none",
+      warnings,
     };
   }
 
   return {
-    sourceText: "",
-    sourceLabel: "Fənn və mövzu əsaslı avtomatik quruluş",
-    sourceType: "none",
+    sourceText: sourceParts.map((part) => part.sourceText).filter(Boolean).join("\n\n"),
+    sourceLabel: sourceParts.map((part) => part.sourceLabel).join(" + "),
+    sourceType: sourceParts.length > 1 ? "combined" : sourceParts[0].sourceType,
+    warnings,
   };
 }
 
@@ -356,7 +447,13 @@ async function generatePlan() {
     });
 
     renderPreview(plan);
-    setMessage("Sizin təqdimat strukturunuz hazırdır!", "success");
+
+    if (sourceData.warnings.length) {
+      setMessage(`Plan quruldu. Qeyd: ${sourceData.warnings.join(" ")}`, "success");
+    } else {
+      setMessage("Sizin təqdimat strukturunuz hazırdır!", "success");
+    }
+
     resultArea.scrollIntoView({ behavior: "smooth", block: "start" });
     return plan;
   } catch (error) {
@@ -377,20 +474,20 @@ function shapeType(pptx, preferred, fallback) {
 
 function getPresentationTheme(plan) {
   const primaryMode = plan.theme.mode === "primary";
-  const smartScale = plan.smartboardMode ? 1.18 : 1;
+  const smartScale = plan.smartboardMode ? 1.2 : 1;
 
   if (primaryMode) {
     return {
       primaryMode,
       smartScale,
-      bg: "FFF7E8",
+      bg: "FFF7E9",
       surface: "FFFFFF",
-      surfaceSoft: "FFF1DB",
+      surfaceSoft: "FFF2DE",
       accent: "FF8F3F",
-      accent2: "3DA4FF",
-      accent3: "68C36B",
-      accent4: "FFD86B",
-      text: "21415B",
+      accent2: "4A9FFF",
+      accent3: "6CC96E",
+      accent4: "F3D45B",
+      text: "203D59",
       muted: "5C7488",
       titleFont: "Arial Rounded MT Bold",
       bodyFont: "Trebuchet MS",
@@ -398,7 +495,6 @@ function getPresentationTheme(plan) {
       sectionTitle: 24 * smartScale,
       bodySize: 16 * smartScale,
       smallSize: 12 * smartScale,
-      navSize: 14 * smartScale,
     };
   }
 
@@ -409,9 +505,9 @@ function getPresentationTheme(plan) {
     surface: "FFFFFF",
     surfaceSoft: "EEF3FB",
     accent: "2F6DF6",
-    accent2: "19A485",
-    accent3: "FF9D2F",
-    accent4: "D9E5FF",
+    accent2: "1A9C80",
+    accent3: "E69B2E",
+    accent4: "D8E3F5",
     text: "162338",
     muted: "5F6F86",
     titleFont: "Aptos Display",
@@ -420,7 +516,6 @@ function getPresentationTheme(plan) {
     sectionTitle: 22 * smartScale,
     bodySize: 14 * smartScale,
     smallSize: 11 * smartScale,
-    navSize: 13 * smartScale,
   };
 }
 
@@ -429,27 +524,27 @@ function addBackgroundDecor(slide, pptx, theme) {
 
   if (theme.primaryMode) {
     slide.addShape(shapeType(pptx, "ellipse", "rect"), {
-      x: -0.2,
-      y: 5.1,
-      w: 2.1,
-      h: 1.8,
+      x: -0.1,
+      y: 5.05,
+      w: 1.95,
+      h: 1.75,
       fill: { color: theme.accent4, transparency: 8 },
       line: { color: theme.accent4, transparency: 100 },
     });
     slide.addShape(shapeType(pptx, "ellipse", "rect"), {
-      x: 10.4,
-      y: -0.15,
-      w: 2,
+      x: 10.5,
+      y: -0.12,
+      w: 1.95,
       h: 1.7,
-      fill: { color: theme.accent2, transparency: 18 },
+      fill: { color: theme.accent2, transparency: 12 },
       line: { color: theme.accent2, transparency: 100 },
     });
     slide.addShape(shapeType(pptx, "ellipse", "rect"), {
-      x: 8.8,
+      x: 9.0,
       y: 5.2,
-      w: 1.6,
-      h: 1.4,
-      fill: { color: theme.accent3, transparency: 18 },
+      w: 1.5,
+      h: 1.35,
+      fill: { color: theme.accent3, transparency: 15 },
       line: { color: theme.accent3, transparency: 100 },
     });
     return;
@@ -459,45 +554,26 @@ function addBackgroundDecor(slide, pptx, theme) {
     x: 0,
     y: 0,
     w: 13.33,
-    h: 0.58,
+    h: 0.55,
     fill: { color: theme.accent },
     line: { color: theme.accent, transparency: 100 },
   });
   slide.addShape(shapeType(pptx, "rect", "rect"), {
-    x: 11.2,
+    x: 11.18,
     y: 0,
-    w: 2.13,
+    w: 2.15,
     h: 7.5,
-    fill: { color: theme.accent4, transparency: 20 },
+    fill: { color: theme.accent4, transparency: 18 },
     line: { color: theme.accent4, transparency: 100 },
-  });
-}
-
-function addPill(slide, pptx, text, x, y, width, theme, fillColor) {
-  slide.addText(text, {
-    x,
-    y,
-    w: width,
-    h: 0.42,
-    align: "center",
-    valign: "mid",
-    color: theme.text,
-    fontFace: theme.bodyFont,
-    fontSize: theme.smallSize,
-    bold: true,
-    shape: shapeType(pptx, "roundRect", "rect"),
-    fill: { color: fillColor || theme.surfaceSoft },
-    line: { color: fillColor || theme.surfaceSoft, transparency: 100 },
-    margin: 0.05,
   });
 }
 
 function addSlideTitle(slide, pptx, title, subtitle, theme) {
   slide.addText(title, {
-    x: 0.65,
-    y: 0.52,
+    x: 0.68,
+    y: 0.55,
     w: 7.8,
-    h: 0.6,
+    h: 0.58,
     color: theme.text,
     fontFace: theme.titleFont,
     fontSize: theme.sectionTitle,
@@ -506,10 +582,10 @@ function addSlideTitle(slide, pptx, title, subtitle, theme) {
   });
 
   slide.addText(subtitle, {
-    x: 0.68,
+    x: 0.7,
     y: 1.16,
-    w: 7.4,
-    h: 0.48,
+    w: 7.45,
+    h: 0.46,
     color: theme.muted,
     fontFace: theme.bodyFont,
     fontSize: theme.bodySize - 1,
@@ -522,10 +598,10 @@ function addCoverSlide(pptx, plan, theme) {
   addBackgroundDecor(slide, pptx, theme);
 
   slide.addText(plan.lessonTitle, {
-    x: 0.8,
-    y: 1.18,
-    w: 7.7,
-    h: 1.25,
+    x: 0.82,
+    y: 1.12,
+    w: 7.15,
+    h: 1.15,
     fontFace: theme.titleFont,
     fontSize: theme.coverTitle,
     bold: true,
@@ -539,10 +615,10 @@ function addCoverSlide(pptx, plan, theme) {
       ? `${plan.subject} • ${plan.grade} • ${plan.topic}`
       : `${plan.subject} • ${plan.grade}`,
     {
-      x: 0.82,
-      y: 2.5,
-      w: 5.3,
-      h: 0.46,
+      x: 0.85,
+      y: 2.36,
+      w: 5.5,
+      h: 0.44,
       fontFace: theme.bodyFont,
       fontSize: theme.bodySize,
       color: theme.text,
@@ -550,45 +626,32 @@ function addCoverSlide(pptx, plan, theme) {
     },
   );
 
-  addPill(slide, pptx, plan.theme.shortLabel, 0.82, 3.12, 2.3, theme, theme.surfaceSoft);
-  addPill(
-    slide,
-    pptx,
-    plan.smartboardMode ? "Smart Board Mode" : "Standart Görünüş",
-    3.28,
-    3.12,
-    2.35,
-    theme,
-    theme.surfaceSoft,
-  );
-
   slide.addText(plan.sourceSummary, {
-    x: 0.84,
-    y: 4.02,
+    x: 0.86,
+    y: 3.18,
     w: 5.6,
-    h: 1.05,
+    h: 1.0,
     fontFace: theme.bodyFont,
     fontSize: theme.bodySize,
     color: theme.muted,
     margin: 0,
-    valign: "mid",
   });
 
   slide.addShape(shapeType(pptx, "roundRect", "rect"), {
-    x: 7.8,
-    y: 1.25,
-    w: 3.8,
-    h: 3.75,
+    x: 7.78,
+    y: 1.18,
+    w: 3.95,
+    h: 3.65,
     fill: { color: theme.surface },
-    line: { color: theme.accent4 || theme.surfaceSoft, width: 1 },
+    line: { color: theme.accent4, width: 1 },
     radius: 0.18,
   });
 
-  slide.addText("Bu təqdimatda yaradılacaq bölmələr", {
-    x: 8.1,
-    y: 1.58,
-    w: 3.1,
-    h: 0.4,
+  slide.addText("Bu təqdimatda istifadə olunacaq hissələr", {
+    x: 8.06,
+    y: 1.5,
+    w: 3.15,
+    h: 0.44,
     fontFace: theme.titleFont,
     fontSize: theme.bodySize + 1,
     bold: true,
@@ -599,70 +662,101 @@ function addCoverSlide(pptx, plan, theme) {
   slide.addText(
     plan.sections.map((section, index) => `${index + 1}. ${section.title}`).join("\n"),
     {
-      x: 8.1,
-      y: 2.1,
-      w: 2.95,
-      h: 2.5,
+      x: 8.08,
+      y: 2.04,
+      w: 3.0,
+      h: 2.4,
       fontFace: theme.bodyFont,
       fontSize: theme.bodySize,
       color: theme.text,
       breakLine: false,
       margin: 0,
-      bullet: { indent: 12 },
     },
   );
 }
 
-function addRouteSlide(pptx, plan, theme) {
+function addPlanSlide(pptx, plan, theme) {
   const slide = pptx.addSlide();
   addBackgroundDecor(slide, pptx, theme);
-  addSlideTitle(slide, pptx, "Dərsin marşrutu", "Bölmələr avtomatik yaradılıb və interaktiv keçidlər əlavə olunub.", theme);
+  addSlideTitle(slide, pptx, "Dərsin planı", "Təqdimatın ümumi axını və müəllim üçün qısa qeyd.", theme);
 
-  const rows = plan.sections.length > 4 ? 3 : 2;
-  const columns = Math.ceil(plan.sections.length / rows);
-  const buttonWidth = theme.primaryMode || plan.smartboardMode ? 2.6 : 2.35;
-  const buttonHeight = plan.smartboardMode ? 0.92 : 0.76;
-  const gapX = 0.24;
-  const gapY = 0.26;
-  const startX = 0.8;
-  const startY = 2.0;
-  const palette = [theme.accent, theme.accent2, theme.accent3, "7A78FF", "F26B8A", "17A34A"];
+  slide.addShape(shapeType(pptx, "roundRect", "rect"), {
+    x: 0.78,
+    y: 1.95,
+    w: 5.1,
+    h: 3.25,
+    fill: { color: theme.surface },
+    line: { color: theme.accent4, width: 1 },
+    radius: 0.18,
+  });
 
-  plan.sections.forEach((section, index) => {
-    const row = Math.floor(index / columns);
-    const column = index % columns;
-
-    slide.addText(section.title, {
-      x: startX + column * (buttonWidth + gapX),
-      y: startY + row * (buttonHeight + gapY),
-      w: buttonWidth,
-      h: buttonHeight,
-      fontFace: theme.titleFont,
-      fontSize: theme.bodySize,
-      bold: true,
-      color: "FFFFFF",
-      align: "center",
-      valign: "mid",
-      shape: shapeType(pptx, "roundRect", "rect"),
-      fill: { color: palette[index % palette.length] },
-      line: { color: palette[index % palette.length], transparency: 100 },
-      hyperlink: { slide: index + 3 },
-      margin: 0.08,
-      fit: "shrink",
-    });
+  slide.addText("Slayd hissələri", {
+    x: 1.05,
+    y: 2.18,
+    w: 2.6,
+    h: 0.34,
+    fontFace: theme.titleFont,
+    fontSize: theme.bodySize + 1,
+    bold: true,
+    color: theme.text,
+    margin: 0,
   });
 
   slide.addText(
-    "Müəllim hər bölmədə izah, sual, məşq, video və ya smartboard aktivliyini özü doldurur.",
+    plan.sections.map((section, index) => `${index + 1}. ${section.title}`).join("\n"),
     {
-      x: 0.82,
-      y: 5.55,
-      w: 8.1,
-      h: 0.42,
+      x: 1.06,
+      y: 2.6,
+      w: 4.25,
+      h: 2.2,
       fontFace: theme.bodyFont,
-      fontSize: theme.smallSize,
-      color: theme.muted,
+      fontSize: theme.bodySize,
+      color: theme.text,
       margin: 0,
+      breakLine: false,
+    },
+  );
+
+  slide.addShape(shapeType(pptx, "roundRect", "rect"), {
+    x: 6.15,
+    y: 1.95,
+    w: 4.35,
+    h: 3.25,
+    fill: { color: theme.surfaceSoft },
+    line: { color: theme.surfaceSoft, transparency: 100 },
+    radius: 0.18,
+  });
+
+  slide.addText("Müəllim üçün qeyd", {
+    x: 6.42,
+    y: 2.18,
+    w: 2.8,
+    h: 0.34,
+    fontFace: theme.titleFont,
+    fontSize: theme.bodySize + 1,
+    bold: true,
+    color: theme.text,
+    margin: 0,
+  });
+
+  slide.addText(
+    [
+      "• Hər bölmənin məzmununu siz dolduracaqsınız.",
+      "• İzah, sual, məşq və video əlavə edə bilərsiniz.",
+      plan.smartboardMode
+        ? "• Bu təqdimat smart lövhə üçün daha iri ölçülərlə hazırlanıb."
+        : "• Standart təqdimat görünüşü istifadə olunur.",
+    ].join("\n"),
+    {
+      x: 6.42,
+      y: 2.62,
+      w: 3.4,
+      h: 2.0,
+      fontFace: theme.bodyFont,
+      fontSize: theme.bodySize,
+      color: theme.text,
+      margin: 0,
+      breakLine: false,
     },
   );
 }
@@ -674,25 +768,25 @@ function addSectionSlide(pptx, plan, section, index, theme) {
 
   const focusItems = (section.focus.length ? section.focus : plan.keywords).slice(
     0,
-    plan.smartboardMode ? 3 : 4,
+    plan.smartboardMode ? 4 : 5,
   );
-  const teacherItems = section.teacherFill.slice(0, plan.smartboardMode ? 3 : 4);
+  const teacherItems = section.teacherFill.slice(0, plan.smartboardMode ? 4 : 5);
 
   slide.addShape(shapeType(pptx, "roundRect", "rect"), {
-    x: 0.74,
+    x: 0.78,
     y: 1.95,
     w: 5.05,
-    h: 2.7,
+    h: 2.95,
     fill: { color: theme.surface },
-    line: { color: theme.accent4 || theme.surfaceSoft, width: 1 },
+    line: { color: theme.accent4, width: 1 },
     radius: 0.18,
   });
 
-  slide.addText("Bu bölmədə vurğulansın", {
-    x: 1.02,
-    y: 2.18,
-    w: 2.8,
-    h: 0.3,
+  slide.addText("Bu slaydda vurğulansın", {
+    x: 1.06,
+    y: 2.2,
+    w: 2.85,
+    h: 0.32,
     fontFace: theme.titleFont,
     fontSize: theme.bodySize + 1,
     bold: true,
@@ -701,10 +795,10 @@ function addSectionSlide(pptx, plan, section, index, theme) {
   });
 
   slide.addText(focusItems.map((item) => `• ${item}`).join("\n"), {
-    x: 1.02,
-    y: 2.6,
-    w: 4.2,
-    h: 1.55,
+    x: 1.06,
+    y: 2.62,
+    w: 4.15,
+    h: 1.9,
     fontFace: theme.bodyFont,
     fontSize: theme.bodySize,
     color: theme.text,
@@ -713,20 +807,20 @@ function addSectionSlide(pptx, plan, section, index, theme) {
   });
 
   slide.addShape(shapeType(pptx, "roundRect", "rect"), {
-    x: 6.08,
+    x: 6.1,
     y: 1.95,
-    w: 4.25,
-    h: 2.7,
+    w: 4.28,
+    h: 2.95,
     fill: { color: theme.surfaceSoft },
     line: { color: theme.surfaceSoft, transparency: 100 },
     radius: 0.18,
   });
 
   slide.addText("Müəllim əlavə edəcək", {
-    x: 6.36,
-    y: 2.18,
+    x: 6.38,
+    y: 2.2,
     w: 2.7,
-    h: 0.3,
+    h: 0.32,
     fontFace: theme.titleFont,
     fontSize: theme.bodySize + 1,
     bold: true,
@@ -735,10 +829,10 @@ function addSectionSlide(pptx, plan, section, index, theme) {
   });
 
   slide.addText(teacherItems.map((item) => `• ${item}`).join("\n"), {
-    x: 6.36,
-    y: 2.6,
-    w: 3.35,
-    h: 1.5,
+    x: 6.38,
+    y: 2.62,
+    w: 3.28,
+    h: 1.85,
     fontFace: theme.bodyFont,
     fontSize: theme.bodySize,
     color: theme.text,
@@ -746,52 +840,31 @@ function addSectionSlide(pptx, plan, section, index, theme) {
     breakLine: false,
   });
 
-  slide.addText(plan.smartboardMode ? "İri mətn və geniş boşluq aktivdir." : "Standart təqdimat axını istifadə olunur.", {
-    x: 0.82,
-    y: 4.92,
-    w: 4.2,
-    h: 0.34,
+  slide.addText(
+    plan.smartboardMode ? "Smart lövhə üçün iri mətn və geniş boşluq aktivdir." : "Standart təqdimat görünüşü istifadə olunur.",
+    {
+      x: 0.86,
+      y: 5.38,
+      w: 5.0,
+      h: 0.3,
+      fontFace: theme.bodyFont,
+      fontSize: theme.smallSize,
+      color: theme.muted,
+      margin: 0,
+    },
+  );
+
+  slide.addText(`${index + 3} / ${plan.sections.length + 2}`, {
+    x: 10.55,
+    y: 5.34,
+    w: 1.2,
+    h: 0.32,
     fontFace: theme.bodyFont,
     fontSize: theme.smallSize,
+    bold: true,
     color: theme.muted,
+    align: "right",
     margin: 0,
-  });
-
-  slide.addText("Marşruta qayıt", {
-    x: 0.82,
-    y: 5.42,
-    w: plan.smartboardMode ? 2.4 : 2.08,
-    h: plan.smartboardMode ? 0.64 : 0.56,
-    fontFace: theme.titleFont,
-    fontSize: theme.navSize,
-    bold: true,
-    color: "FFFFFF",
-    align: "center",
-    valign: "mid",
-    shape: shapeType(pptx, "roundRect", "rect"),
-    fill: { color: theme.accent },
-    line: { color: theme.accent, transparency: 100 },
-    hyperlink: { slide: 2 },
-    margin: 0.08,
-  });
-
-  const hasNextSlide = index < plan.sections.length - 1;
-  slide.addText(hasNextSlide ? "Növbəti bölmə" : "Yekun", {
-    x: 9.2,
-    y: 5.42,
-    w: plan.smartboardMode ? 2.4 : 2.08,
-    h: plan.smartboardMode ? 0.64 : 0.56,
-    fontFace: theme.titleFont,
-    fontSize: theme.navSize,
-    bold: true,
-    color: "FFFFFF",
-    align: "center",
-    valign: "mid",
-    shape: shapeType(pptx, "roundRect", "rect"),
-    fill: { color: theme.accent2 },
-    line: { color: theme.accent2, transparency: 100 },
-    hyperlink: { slide: hasNextSlide ? index + 4 : 2 },
-    margin: 0.08,
   });
 }
 
@@ -811,7 +884,7 @@ function buildPresentation(plan) {
   pptx.company = "";
 
   addCoverSlide(pptx, plan, theme);
-  addRouteSlide(pptx, plan, theme);
+  addPlanSlide(pptx, plan, theme);
   plan.sections.forEach((section, index) => addSectionSlide(pptx, plan, section, index, theme));
 
   return pptx;
@@ -825,7 +898,6 @@ function createPptxFileName(plan) {
 
 async function downloadPresentation() {
   const plan = plannerState.plan || (await generatePlan());
-
   if (!plan) {
     return;
   }
@@ -874,6 +946,7 @@ smartboardToggle.addEventListener("change", updateSmartboardIndicator);
 resourceUrlInput.addEventListener("input", updateResourceHint);
 sourceTextInput.addEventListener("input", updateResourceHint);
 pdfInput.addEventListener("change", updateResourceHint);
+dailyPlanInput.addEventListener("change", updateResourceHint);
 
 updateThemeIndicator();
 updateSmartboardIndicator();
@@ -882,4 +955,3 @@ renderKeywords([]);
 renderList(conceptList, [], "Əsas anlayışlar mövzuya əsasən qurulacaq.");
 renderList(activityList, [], "Fəaliyyət hissəsi fənnə uyğun avtomatik hazırlanacaq.");
 renderList(questionList, [], "Sual istiqamətləri mövzuya uyğun müəllim tərəfindən doldurulacaq.");
-

@@ -147,17 +147,17 @@
     if (primaryMode) {
       return {
         mode: "primary",
-        label: "\ud83c\udfa8 Theme: Primary School Mode",
-        shortLabel: "Primary School Mode",
-        description: "1-4-c\u00fc sinifl\u0259r \u00fc\u00e7\u00fcn daha r\u0259ngli, iri v\u0259 smartboard-friendly vizual dil.",
+        label: "\ud83c\udfa8 Dizayn: ?btidai sinif rejimi",
+        shortLabel: "?btidai sinif rejimi",
+        description: "1-4-c? sinifl?r ???n daha r?ngli, iri v? canl? t?qdimat g?r?n???.",
       };
     }
 
     return {
       mode: "academic",
-      label: "\ud83c\udfa8 Theme: Academic Mode",
-      shortLabel: "Academic Mode",
-      description: "5-11-ci sinifl\u0259r \u00fc\u00e7\u00fcn daha s\u0259liq\u0259li, m\u00fcasir v\u0259 fokuslu t\u0259qdimat g\u00f6r\u00fcn\u00fc\u015f\u00fc.",
+      label: "\ud83c\udfa8 Dizayn: Akademik rejim",
+      shortLabel: "Akademik rejim",
+      description: "5-11-ci sinifl?r ???n daha s?liq?li, m?asir v? fokuslu t?qdimat g?r?n???.",
     };
   }
 
@@ -412,14 +412,14 @@
   }
 
   function buildForeignLanguageSections(primaryMode, keywords, activities, teacherFill) {
-    const finalSectionTitle = primaryMode ? "Game" : "Practice";
+    const finalSectionTitle = primaryMode ? "Oyun" : "M??q";
 
     return [
-      buildSection("Warm-up", "M\u00f6vzuya giri\u015f \u00fc\u00e7\u00fcn q\u0131sa dan\u0131\u015f\u0131q v\u0259 ya \u015f\u0259kil f\u0259aliyy\u0259ti.", teacherFill, keywords),
-      buildSection("Vocabulary", "Yeni s\u00f6zl\u0259ri v\u0259 ifad\u0259l\u0259ri sistemli \u015f\u0259kild\u0259 t\u0259qdim etm\u0259k.", teacherFill, keywords),
-      buildSection("Reading", "Q\u0131sa m\u0259tn \u00fcz\u0259rind\u0259 ba\u015fa d\u00fc\u015fm\u0259 i\u015fi qurmaq.", teacherFill, activities),
-      buildSection("Listening", "Audio v\u0259 ya m\u00fc\u0259llim oxusu il\u0259 dinl\u0259m\u0259 tap\u015f\u0131r\u0131\u011f\u0131 verm\u0259k.", teacherFill, activities),
-      buildSection("Speaking", "C\u00fct v\u0259 ya qrup dan\u0131\u015f\u0131q f\u0259aliyy\u0259ti t\u0259\u015fkil etm\u0259k.", teacherFill, activities),
+      buildSection("M?vzuya giri?", "M?vzuya giri? ???n q?sa dan???q v? ya ??kil f?aliyy?ti.", teacherFill, keywords),
+      buildSection("S?z ehtiyat?", "Yeni s?zl?ri v? ifad?l?ri sistemli ??kild? t?qdim etm?k.", teacherFill, keywords),
+      buildSection("Oxu", "Q?sa m?tn ?z?rind? ba?a d??m? i?i qurmaq.", teacherFill, activities),
+      buildSection("Dinl?m?", "Audio v? ya m??llim oxusu il? dinl?m? tap??r??? verm?k.", teacherFill, activities),
+      buildSection("Dan???q", "C?t v? ya qrup dan???q f?aliyy?ti t??kil etm?k.", teacherFill, activities),
       buildSection(
         finalSectionTitle,
         primaryMode

@@ -36,15 +36,15 @@
         </p>
 
         <div class="hero__status-row">
-          <div class="status-pill" id="theme-indicator">🎨 Theme: Academic Mode</div>
-          <div class="status-pill" id="smartboard-indicator">🖥 Smart Board Mode: Off</div>
+          <div class="status-pill" id="theme-indicator">🎨 Dizayn: Akademik rejim</div>
+          <div class="status-pill" id="smartboard-indicator">🖥 Smart lövhə: deaktiv</div>
         </div>
       </header>
 
       <main class="planner-grid">
         <section class="panel panel--form">
           <div class="panel__header">
-            <p class="eyebrow">Yeni workflow</p>
+            <p class="eyebrow">Yeni ax?n</p>
             <h2>Avtomatik dərs qurucusu</h2>
           </div>
 
@@ -140,12 +140,20 @@
               <div class="step-card__head">
                 <span class="step-card__number">4</span>
                 <div>
-                  <h3>TRIMS və ya dərslik mənbəsi</h3>
-                  <p>
-                    İstəyə bağlı olaraq TRIMS linki, PDF səhifəsi və ya dərslik mətni əlavə edin.
-                  </p>
+                  <h3>Mənbələri əlavə edin</h3>
+                  <p>Günlük dərs planı, TRIMS linki və ya dərslik materialı əlavə edə bilərsiniz.</p>
                 </div>
               </div>
+
+              <label class="field">
+                <span>Günlük Dərslər faylı</span>
+                <input
+                  id="daily-plan-input"
+                  name="dailyPlanFile"
+                  type="file"
+                  accept=".pdf,.txt,.docx,application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                />
+              </label>
 
               <label class="field">
                 <span>TRIMS linki</span>
@@ -159,8 +167,8 @@
               </label>
 
               <label class="field">
-                <span>PDF və ya kitab səhifəsi</span>
-                <input id="pdf-input" name="pdfFile" type="file" accept=".pdf,application/pdf" />
+                <span>Dərslik PDF-i və ya kitab səhifəsi</span>
+                <input id="pdf-input" name="pdfFile" type="file" accept=".pdf,application/pdf,.txt,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
               </label>
 
               <label class="field">
@@ -169,12 +177,12 @@
                   id="source-text-input"
                   name="sourceText"
                   rows="7"
-                  placeholder="Dərslikdən mətn, tapşırıq və ya izah hissəsini bura əlavə edin."
+                  placeholder="Dərslikdən mətn, tapşırıq, izah və ya sualları bura əlavə edin."
                 ></textarea>
               </label>
 
               <p class="field-hint" id="resource-hint">
-                Mənbə əlavə edilməsə, KNSlides Pro yalnız fənn + sinif + mövzuya əsasən plan quracaq.
+                Günlük dərs, TRIMS və dərslik mənbələri birlikdə istifadə oluna bilər. Fayl üçün PDF, DOCX və TXT dəstəklənir.
               </p>
             </div>
 
@@ -182,14 +190,14 @@
               <div class="step-card__head">
                 <span class="step-card__number">5</span>
                 <div>
-                  <h3>Smartboard Mode</h3>
-                  <p>İri mətn, geniş klik sahələri və uzaqdan daha rahat görünüş.</p>
+                  <h3>Smart lövhə rejimi</h3>
+                  <p>İri mətn, geniş boşluq və uzaqdan daha rahat görünüş.</p>
                 </div>
               </div>
 
               <label class="toggle-card" for="smartboard-toggle">
                 <div>
-                  <strong>🖥 Smart Board Mode</strong>
+                  <strong>🖥 Smart lövhə rejimi</strong>
                   <span>Təqdimatı interaktiv lövhə üçün optimallaşdır.</span>
                 </div>
                 <span class="toggle-switch">
@@ -215,15 +223,15 @@
 
         <section class="panel panel--output">
           <div class="panel__header">
-            <p class="eyebrow">Preview</p>
+            <p class="eyebrow">?n bax??</p>
             <h2>Avtomatik yaradılmış təqdimat</h2>
           </div>
 
           <div id="empty-state" class="empty-state">
             <p>Plan hələ qurulmayıb.</p>
             <span>
-              Fənn, sinif və mövzu daxil edin. İstəsəniz TRIMS və ya dərslik mənbəsi də əlavə
-              edin, sonra KNSlides Pro strukturunu avtomatik hazırlayacaq.
+              Fənn, sinif və mövzu daxil edin. İstəsəniz günlük dərs planı, TRIMS və ya dərslik
+              mənbəsi də əlavə edin, sonra KNSlides Pro strukturu avtomatik hazırlayacaq.
             </span>
           </div>
 
@@ -254,8 +262,8 @@
                   <h3 id="lesson-title">-</h3>
                 </div>
                 <div class="result-badges">
-                  <span class="preview-badge" id="preview-theme-badge">🎨 Theme: Academic Mode</span>
-                  <span class="preview-badge" id="preview-smartboard-badge">🖥 Smart Board: Off</span>
+                  <span class="preview-badge" id="preview-theme-badge">🎨 Dizayn: Akademik rejim</span>
+                  <span class="preview-badge" id="preview-smartboard-badge">🖥 Smart lövhə: deaktiv</span>
                 </div>
               </div>
 
@@ -266,7 +274,7 @@
             <section class="result-block">
               <div class="result-block__head">
                 <div>
-                  <p class="result-block__eyebrow">Auto-generated flow</p>
+                  <p class="result-block__eyebrow">Slayd axını</p>
                   <h3>Slayd planı</h3>
                 </div>
               </div>
@@ -297,6 +305,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.12.0/mammoth.browser.min.js"></script>
     <script src="./lesson-engine.js"></script>
     <script src="./script.js"></script>
     <script src="./theme-ui.js"></script>
